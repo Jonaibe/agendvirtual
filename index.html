@@ -2,418 +2,746 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>App de Agendamento — Editor</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>AgendVirtual — Painel do Estabelecimento</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
+:root{
+  --bg:#0a0a0a;--surface:#141414;--surface2:#1c1c1c;
+  --gold:#c9a96e;--gold2:#e8c98a;--text:#f0ebe4;--muted:#8a7e72;
+  --border:rgba(201,169,110,.18);--border2:rgba(201,169,110,.35);
+  --red:#ff4d4d;--green:#4dcc8f;
+}
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'DM Sans',sans-serif;background:#0a0a0a;color:#f0ebe4;min-height:100vh;display:flex;flex-direction:column}
+html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden}
 
-/* TOP BAR */
-.topbar{background:#111;border-bottom:1px solid rgba(255,255,255,.07);padding:.75rem 1.5rem;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;flex-shrink:0}
-.topbar-brand{font-size:13px;font-weight:500;color:#c9a96e;letter-spacing:.05em}
-.topbar-brand span{color:#555;font-weight:300}
-.topbar-actions{display:flex;gap:8px}
-.tbtn{padding:.45rem 1rem;border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;letter-spacing:.04em;border:none;transition:.2s;font-family:'DM Sans',sans-serif}
+/* ── TELAS (auth / trial / paywall / editor) ── */
+.screen{display:none;min-height:100vh}
+.screen.active{display:flex}
+
+/* ══════════════════════════════════════
+   AUTH SCREEN
+══════════════════════════════════════ */
+#screen-auth{flex-direction:column;align-items:center;justify-content:center;padding:2rem 1.25rem;
+  background:radial-gradient(ellipse at 50% -20%,rgba(201,169,110,.12) 0%,transparent 60%)}
+
+.auth-logo{text-align:center;margin-bottom:2.5rem}
+.auth-logo-name{font-family:'Cormorant Garamond',serif;font-size:2.2rem;color:var(--gold2);letter-spacing:.12em;font-weight:300}
+.auth-logo-sub{font-size:11px;letter-spacing:.3em;color:var(--muted);text-transform:uppercase;margin-top:4px}
+
+.auth-card{width:100%;max-width:420px;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:2rem 1.75rem;box-shadow:0 24px 60px rgba(0,0,0,.5)}
+
+.auth-tabs{display:flex;gap:0;margin-bottom:1.75rem;background:var(--bg);border-radius:12px;padding:4px}
+.auth-tab{flex:1;padding:.6rem;border:none;border-radius:9px;background:none;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:400;cursor:pointer;transition:.2s;letter-spacing:.04em}
+.auth-tab.active{background:var(--gold);color:#0a0a0a;font-weight:500}
+
+.auth-form{display:flex;flex-direction:column;gap:.9rem}
+.auth-form.hidden{display:none}
+
+.field-label{font-size:10px;letter-spacing:.12em;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:.35rem}
+.field-input{width:100%;background:var(--bg);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:.7rem 1rem;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;transition:.2s;-webkit-appearance:none}
+.field-input:focus{border-color:var(--gold)}
+.field-input::placeholder{color:#3a3530}
+
+.btn-auth{width:100%;padding:.85rem;border-radius:12px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;letter-spacing:.06em;cursor:pointer;border:none;transition:all .25s;margin-top:.25rem}
+.btn-auth-primary{background:var(--gold);color:#0a0a0a}
+.btn-auth-primary:hover{background:var(--gold2);transform:translateY(-1px)}
+.btn-auth-primary:disabled{opacity:.4;cursor:not-allowed;transform:none}
+
+.auth-err{font-size:12px;color:var(--red);text-align:center;min-height:16px}
+.auth-note{font-size:11px;color:var(--muted);text-align:center;line-height:1.6;margin-top:.5rem}
+
+/* ══════════════════════════════════════
+   TRIAL / PAYWALL SCREENS
+══════════════════════════════════════ */
+#screen-trial,#screen-paywall{flex-direction:column;align-items:center;justify-content:center;padding:2rem 1.25rem;
+  background:radial-gradient(ellipse at 50% -10%,rgba(201,169,110,.1) 0%,transparent 60%)}
+
+.info-card{width:100%;max-width:420px;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:2rem 1.75rem;text-align:center}
+.info-icon{font-size:3rem;margin-bottom:1rem}
+.info-title{font-family:'Cormorant Garamond',serif;font-size:1.8rem;color:var(--gold2);margin-bottom:.5rem;font-weight:300}
+.info-sub{font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:1.5rem}
+
+.trial-badge{display:inline-block;background:rgba(77,204,143,.12);border:1px solid rgba(77,204,143,.3);border-radius:20px;padding:.4rem 1rem;font-size:12px;color:var(--green);letter-spacing:.08em;margin-bottom:1.25rem}
+.trial-days{font-family:'Cormorant Garamond',serif;font-size:4rem;color:var(--gold);font-weight:300;line-height:1;margin:.5rem 0 .25rem}
+.trial-days-label{font-size:11px;color:var(--muted);letter-spacing:.2em;text-transform:uppercase}
+
+.pay-price{font-family:'Cormorant Garamond',serif;font-size:3.5rem;color:var(--gold);font-weight:300;line-height:1;margin:.75rem 0 0}
+.pay-period{font-size:12px;color:var(--muted);letter-spacing:.12em;margin-bottom:1.5rem}
+.pay-features{text-align:left;margin-bottom:1.5rem;display:flex;flex-direction:column;gap:.5rem}
+.pay-feat{display:flex;align-items:center;gap:8px;font-size:13px;color:#ccc}
+.pay-feat::before{content:'✓';color:var(--green);font-weight:500;flex-shrink:0}
+
+.btn-cta{width:100%;padding:.9rem;border-radius:12px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;letter-spacing:.06em;cursor:pointer;border:none;transition:all .25s;margin-bottom:.75rem}
+.btn-cta-gold{background:var(--gold);color:#0a0a0a}
+.btn-cta-gold:hover{background:var(--gold2);transform:translateY(-1px)}
+.btn-cta-ghost{background:none;border:1px solid var(--border);color:var(--muted)}
+.btn-cta-ghost:hover{border-color:var(--border2);color:var(--text)}
+
+/* ══════════════════════════════════════
+   EDITOR SCREEN (responsivo)
+══════════════════════════════════════ */
+#screen-editor{flex-direction:column}
+
+/* top bar */
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:.65rem 1rem;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-shrink:0;position:sticky;top:0;z-index:100}
+.topbar-brand{font-size:13px;font-weight:500;color:var(--gold);letter-spacing:.05em}
+.topbar-brand span{color:#444;font-weight:300;font-size:11px}
+.topbar-right{display:flex;align-items:center;gap:6px}
+.tbtn{padding:.4rem .85rem;border-radius:8px;font-size:11px;font-weight:500;cursor:pointer;letter-spacing:.04em;border:none;transition:.2s;font-family:'DM Sans',sans-serif;white-space:nowrap}
 .tbtn-ghost{background:rgba(255,255,255,.06);color:#aaa;border:1px solid rgba(255,255,255,.1)}
 .tbtn-ghost:hover{background:rgba(255,255,255,.1);color:#fff}
-.tbtn-gold{background:#c9a96e;color:#0a0a0a}
-.tbtn-gold:hover{background:#e8c98a}
+.tbtn-gold{background:var(--gold);color:#0a0a0a}
+.tbtn-gold:hover{background:var(--gold2)}
+.tbtn-red{background:rgba(255,77,77,.12);color:#ff7070;border:1px solid rgba(255,77,77,.2)}
+.tbtn-red:hover{background:rgba(255,77,77,.2)}
 
-/* LAYOUT */
-.editor-layout{display:grid;grid-template-columns:360px 1fr;flex:1;overflow:hidden;height:calc(100vh - 53px)}
+/* trial badge na topbar */
+.trial-info{font-size:10px;color:var(--green);background:rgba(77,204,143,.1);border:1px solid rgba(77,204,143,.2);border-radius:20px;padding:.25rem .65rem;letter-spacing:.04em}
+
+/* editor layout: mobile = abas / desktop = split */
+.editor-layout{flex:1;display:flex;overflow:hidden}
+
+/* MOBILE: tabs nav em baixo + painel único */
+.mobile-tabs{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);z-index:99;padding:.5rem .75rem;gap:4px}
+.mob-tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:.4rem .25rem;border:none;background:none;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:9px;cursor:pointer;border-radius:8px;transition:.2s;letter-spacing:.04em}
+.mob-tab .mob-icon{font-size:18px;line-height:1}
+.mob-tab.active{color:var(--gold);background:rgba(201,169,110,.08)}
 
 /* SIDEBAR */
-.sidebar{background:#111;border-right:1px solid rgba(255,255,255,.07);overflow-y:auto;padding:0}
-.sidebar::-webkit-scrollbar{width:4px}
-.sidebar::-webkit-scrollbar-thumb{background:#333;border-radius:4px}
-.sidebar-section{border-bottom:1px solid rgba(255,255,255,.06)}
-.sidebar-toggle{width:100%;background:none;border:none;color:#ddd;padding:1rem 1.25rem;display:flex;align-items:center;justify-content:space-between;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;letter-spacing:.04em;text-align:left;transition:.15s}
-.sidebar-toggle:hover{background:rgba(255,255,255,.03);color:#fff}
-.sidebar-toggle .arrow{font-size:10px;color:#555;transition:.2s}
-.sidebar-toggle.open .arrow{transform:rotate(180deg);color:#c9a96e}
-.sidebar-body{display:none;padding:1rem 1.25rem 1.25rem;gap:12px;flex-direction:column}
-.sidebar-body.open{display:flex}
+.sidebar{width:340px;min-width:340px;background:var(--surface);border-right:1px solid var(--border);overflow-y:auto;flex-shrink:0}
+.sidebar::-webkit-scrollbar{width:3px}
+.sidebar::-webkit-scrollbar-thumb{background:#2a2a2a;border-radius:4px}
 
-/* Form controls */
-.field-label{font-size:10px;letter-spacing:.1em;color:#666;text-transform:uppercase;margin-bottom:.35rem;display:block}
-.field-input{width:100%;background:#1a1a1a;border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:.6rem .8rem;color:#f0ebe4;font-family:'DM Sans',sans-serif;font-size:13px;outline:none;transition:.2s}
-.field-input:focus{border-color:rgba(201,169,110,.5)}
-.field-input::placeholder{color:#444}
-textarea.field-input{resize:none;height:60px;line-height:1.5}
-.color-row{display:flex;gap:8px;align-items:center}
-.color-picker{width:40px;height:36px;border-radius:8px;border:1px solid rgba(255,255,255,.1);cursor:pointer;padding:2px;background:#1a1a1a}
-
-/* Logo */
-.logo-upload-area{border:1px dashed rgba(255,255,255,.15);border-radius:10px;padding:1.25rem;text-align:center;cursor:pointer;transition:.2s;background:rgba(255,255,255,.02)}
-.logo-upload-area:hover{border-color:rgba(201,169,110,.4);background:rgba(201,169,110,.03)}
-.logo-upload-area input{display:none}
-.logo-preview{max-width:120px;max-height:50px;object-fit:contain;display:none;margin:0 auto .5rem}
-.upload-hint{font-size:11px;color:#555;line-height:1.5}
-
-/* Items */
-.item-list{display:flex;flex-direction:column;gap:8px}
-.item-row{background:#1a1a1a;border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:.75rem;position:relative}
-.item-row-top{display:flex;gap:6px;margin-bottom:6px;align-items:center}
-.item-row-top .field-input{flex:1}
-.item-row-bottom{display:grid;grid-template-columns:1fr 1fr;gap:6px}
-.item-delete{width:28px;height:28px;border-radius:6px;background:rgba(255,60,60,.1);border:1px solid rgba(255,60,60,.2);color:#ff6060;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:.2s}
-.item-delete:hover{background:rgba(255,60,60,.2)}
-.add-btn{width:100%;padding:.6rem;background:rgba(201,169,110,.06);border:1px dashed rgba(201,169,110,.3);border-radius:8px;color:#c9a96e;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:.2s}
-.add-btn:hover{background:rgba(201,169,110,.12)}
-.prof-row{background:#1a1a1a;border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:.75rem}
-.prof-row-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px}
-.prof-delete{float:right;width:24px;height:24px;border-radius:6px;background:rgba(255,60,60,.1);border:1px solid rgba(255,60,60,.15);color:#ff6060;cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;transition:.2s;margin-left:6px}
-
-/* Theme dots */
-.theme-row{display:flex;gap:8px;flex-wrap:wrap}
-.theme-dot{width:28px;height:28px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:.2s}
-.theme-dot.active{border-color:#fff;transform:scale(1.1)}
-
-/* ===== CARD STYLE GALLERY ===== */
-.card-gallery{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.card-style-opt{
-  border:1.5px solid rgba(255,255,255,.1);border-radius:10px;
-  padding:.6rem;cursor:pointer;transition:all .2s;background:#161616;
-  display:flex;flex-direction:column;align-items:center;gap:6px;
-}
-.card-style-opt:hover{border-color:rgba(201,169,110,.4);background:#1e1c18}
-.card-style-opt.active{border-color:#c9a96e;background:rgba(201,169,110,.08)}
-.card-style-opt .cso-label{font-size:10px;color:#888;letter-spacing:.05em;text-align:center}
-.card-style-opt.active .cso-label{color:#c9a96e}
-/* mini preview inside each option */
-.cso-preview{width:100%;height:52px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#aaa;position:relative;overflow:hidden}
-
-/* Icon size control */
-.icon-size-row{display:flex;gap:6px}
-.icon-size-btn{flex:1;padding:.4rem;border-radius:7px;background:#1a1a1a;border:1px solid rgba(255,255,255,.1);color:#888;font-size:13px;cursor:pointer;text-align:center;transition:.2s;font-family:'DM Sans',sans-serif}
-.icon-size-btn.active{border-color:#c9a96e;color:#c9a96e;background:rgba(201,169,110,.08)}
-
-/* Border radius control */
-.radius-row{display:flex;gap:6px}
-.radius-btn{flex:1;padding:.4rem;border-radius:7px;background:#1a1a1a;border:1px solid rgba(255,255,255,.1);color:#888;font-size:11px;cursor:pointer;text-align:center;transition:.2s;font-family:'DM Sans',sans-serif}
-.radius-btn.active{border-color:#c9a96e;color:#c9a96e;background:rgba(201,169,110,.08)}
-
-/* Grid cols */
-.cols-row{display:flex;gap:6px}
-.cols-btn{flex:1;padding:.4rem;border-radius:7px;background:#1a1a1a;border:1px solid rgba(255,255,255,.1);color:#888;font-size:11px;cursor:pointer;text-align:center;transition:.2s;font-family:'DM Sans',sans-serif}
-.cols-btn.active{border-color:#c9a96e;color:#c9a96e;background:rgba(201,169,110,.08)}
-
-/* Badge toggle */
-.toggle-row{display:flex;align-items:center;justify-content:space-between}
-.toggle-label{font-size:12px;color:#aaa}
-.toggle-switch{position:relative;width:38px;height:22px}
-.toggle-switch input{opacity:0;width:0;height:0}
-.toggle-track{position:absolute;inset:0;background:#333;border-radius:11px;cursor:pointer;transition:.3s}
-.toggle-track:before{content:'';position:absolute;width:16px;height:16px;left:3px;bottom:3px;background:#888;border-radius:50%;transition:.3s}
-.toggle-switch input:checked+.toggle-track{background:rgba(201,169,110,.3)}
-.toggle-switch input:checked+.toggle-track:before{transform:translateX(16px);background:#c9a96e}
-
-/* PREVIEW */
-.preview-wrap{overflow:hidden;display:flex;flex-direction:column;background:#1a1614}
-.preview-topbar{background:#111;border-bottom:1px solid rgba(255,255,255,.07);padding:.5rem 1rem;display:flex;align-items:center;gap:8px}
-.preview-label{font-size:11px;color:#555;letter-spacing:.08em}
-.preview-dots{display:flex;gap:5px}
-.preview-dot{width:10px;height:10px;border-radius:50%}
+/* PREVIEW PANEL */
+.preview-panel{flex:1;overflow:hidden;display:flex;flex-direction:column;background:#1a1614}
+.preview-bar{background:var(--surface);border-bottom:1px solid var(--border);padding:.4rem .75rem;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-shrink:0}
+.preview-dots{display:flex;gap:4px}
+.p-dot{width:9px;height:9px;border-radius:50%}
+.preview-label{font-size:10px;color:#555;letter-spacing:.08em}
+.preview-share{font-size:11px;color:var(--gold);background:rgba(201,169,110,.1);border:1px solid var(--border);border-radius:6px;padding:.25rem .6rem;cursor:pointer;transition:.2s}
+.preview-share:hover{background:rgba(201,169,110,.2)}
 .preview-frame-wrap{flex:1;overflow-y:auto}
-.preview-frame-wrap::-webkit-scrollbar{width:4px}
-.preview-frame-wrap::-webkit-scrollbar-thumb{background:#333}
+.preview-frame-wrap::-webkit-scrollbar{width:3px}
+.preview-frame-wrap::-webkit-scrollbar-thumb{background:#2a2a2a}
 iframe#preview{width:100%;min-height:100%;border:none;display:block}
 
-/* MODAL */
-.modal-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:1000;align-items:center;justify-content:center;padding:1rem}
-.modal-backdrop.show{display:flex}
-.modal{background:#161616;border:1px solid rgba(201,169,110,.2);border-radius:16px;padding:1.5rem;max-width:500px;width:100%}
-.modal h3{font-family:'Cormorant Garamond',serif;font-size:1.4rem;color:#e8c98a;margin-bottom:.5rem}
-.modal p{font-size:13px;color:#888;line-height:1.6;margin-bottom:.75rem}
-.modal-btns{display:flex;gap:8px;margin-top:1.25rem}
+/* sidebar sections */
+.sidebar-section{border-bottom:1px solid rgba(255,255,255,.05)}
+.sidebar-toggle{width:100%;background:none;border:none;color:#ddd;padding:.9rem 1rem;display:flex;align-items:center;justify-content:space-between;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;letter-spacing:.04em;text-align:left;transition:.15s}
+.sidebar-toggle:hover{background:rgba(255,255,255,.03);color:#fff}
+.sidebar-toggle .arrow{font-size:9px;color:#444;transition:.2s}
+.sidebar-toggle.open .arrow{transform:rotate(180deg);color:var(--gold)}
+.sidebar-body{display:none;padding:.85rem 1rem 1rem;gap:10px;flex-direction:column}
+.sidebar-body.open{display:flex}
 
-/* Divider */
-.divider{height:1px;background:rgba(255,255,255,.06);margin:.25rem 0}
+.field-label-s{font-size:9px;letter-spacing:.12em;color:#555;text-transform:uppercase;margin-bottom:.3rem;display:block}
+.field-input-s{width:100%;background:var(--bg);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:.55rem .75rem;color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px;outline:none;transition:.2s;-webkit-appearance:none}
+.field-input-s:focus{border-color:rgba(201,169,110,.5)}
+.field-input-s::placeholder{color:#333}
+textarea.field-input-s{resize:none;height:54px;line-height:1.5}
+.color-row{display:flex;gap:6px;align-items:center}
+.color-picker{width:36px;height:32px;border-radius:7px;border:1px solid rgba(255,255,255,.1);cursor:pointer;padding:2px;background:var(--bg);flex-shrink:0}
+
+/* logo upload */
+.logo-upload-area{border:1px dashed rgba(255,255,255,.12);border-radius:10px;padding:1rem;text-align:center;cursor:pointer;transition:.2s;background:rgba(255,255,255,.02)}
+.logo-upload-area:hover{border-color:rgba(201,169,110,.4)}
+.logo-upload-area input{display:none}
+.logo-preview-img{max-width:110px;max-height:44px;object-fit:contain;display:none;margin:0 auto .4rem}
+.upload-hint{font-size:11px;color:#444;line-height:1.4}
+
+/* service / prof items */
+.item-list{display:flex;flex-direction:column;gap:6px}
+.item-row{background:var(--bg);border:1px solid rgba(255,255,255,.07);border-radius:9px;padding:.65rem}
+.item-row-top{display:flex;gap:5px;margin-bottom:5px;align-items:center}
+.item-row-top .field-input-s{flex:1}
+.item-row-bottom{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.item-delete{width:26px;height:26px;border-radius:6px;background:rgba(255,60,60,.1);border:1px solid rgba(255,60,60,.2);color:#ff6060;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:.2s}
+.item-delete:hover{background:rgba(255,60,60,.2)}
+.add-btn{width:100%;padding:.55rem;background:rgba(201,169,110,.05);border:1px dashed rgba(201,169,110,.25);border-radius:7px;color:var(--gold);font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:.2s}
+.add-btn:hover{background:rgba(201,169,110,.1)}
+.prof-row{background:var(--bg);border:1px solid rgba(255,255,255,.07);border-radius:9px;padding:.65rem}
+.prof-row-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:5px}
+
+/* themes */
+.theme-row{display:flex;gap:7px;flex-wrap:wrap}
+.theme-dot{width:26px;height:26px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:.2s;flex-shrink:0}
+.theme-dot.active{border-color:#fff;transform:scale(1.1)}
+
+/* card style gallery */
+.card-gallery{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.card-style-opt{border:1.5px solid rgba(255,255,255,.1);border-radius:9px;padding:.5rem;cursor:pointer;transition:all .2s;background:var(--bg);display:flex;flex-direction:column;align-items:center;gap:5px}
+.card-style-opt:hover{border-color:rgba(201,169,110,.4)}
+.card-style-opt.active{border-color:var(--gold);background:rgba(201,169,110,.07)}
+.cso-label{font-size:9px;color:#666;letter-spacing:.05em;text-align:center}
+.card-style-opt.active .cso-label{color:var(--gold)}
+.cso-preview{width:100%;height:46px;border-radius:5px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+
+/* toggles */
+.toggle-row{display:flex;align-items:center;justify-content:space-between}
+.toggle-lbl{font-size:11px;color:#aaa}
+.toggle-sw{position:relative;width:36px;height:20px}
+.toggle-sw input{opacity:0;width:0;height:0}
+.toggle-track{position:absolute;inset:0;background:#2a2a2a;border-radius:10px;cursor:pointer;transition:.3s}
+.toggle-track:before{content:'';position:absolute;width:14px;height:14px;left:3px;bottom:3px;background:#555;border-radius:50%;transition:.3s}
+.toggle-sw input:checked+.toggle-track{background:rgba(201,169,110,.3)}
+.toggle-sw input:checked+.toggle-track:before{transform:translateX(16px);background:var(--gold)}
+
+.icon-size-row,.radius-row,.cols-row{display:flex;gap:5px}
+.ctrl-btn{flex:1;padding:.38rem;border-radius:6px;background:var(--bg);border:1px solid rgba(255,255,255,.1);color:#666;font-size:11px;cursor:pointer;text-align:center;transition:.2s;font-family:'DM Sans',sans-serif}
+.ctrl-btn.active{border-color:var(--gold);color:var(--gold);background:rgba(201,169,110,.07)}
+.divider{height:1px;background:rgba(255,255,255,.05);margin:.1rem 0}
+
+/* share modal */
+.modal-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:200;align-items:center;justify-content:center;padding:1rem}
+.modal-backdrop.show{display:flex}
+.modal{background:var(--surface);border:1px solid rgba(201,169,110,.25);border-radius:18px;padding:1.5rem;max-width:440px;width:100%}
+.modal h3{font-family:'Cormorant Garamond',serif;font-size:1.4rem;color:var(--gold2);margin-bottom:.4rem}
+.modal p{font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:.75rem}
+.modal-link-box{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:.75rem 1rem;font-size:12px;color:var(--gold);word-break:break-all;margin-bottom:1rem;font-family:monospace}
+.modal-btns{display:flex;gap:8px}
+.mbtn{flex:1;padding:.7rem;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;cursor:pointer;border:none;transition:.2s}
+.mbtn-gold{background:var(--gold);color:#0a0a0a}
+.mbtn-gold:hover{background:var(--gold2)}
+.mbtn-ghost{background:rgba(255,255,255,.06);color:#aaa;border:1px solid rgba(255,255,255,.1)}
+.mbtn-ghost:hover{background:rgba(255,255,255,.1)}
+
+/* mobile panel view */
+.mobile-panel{display:none}
+
+/* ── RESPONSIVO ── */
+@media(max-width:768px){
+  .sidebar{display:none}
+  .preview-panel{display:none}
+  .mobile-tabs{display:flex}
+  .mobile-panel{display:flex;flex-direction:column;flex:1;overflow:hidden;padding-bottom:70px}
+  /* mostrar painel ativo */
+  .mobile-panel-pane{display:none;flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+  .mobile-panel-pane::-webkit-scrollbar{width:0}
+  .mobile-panel-pane.active{display:flex;flex-direction:column}
+  /* painel editar = sidebar responsivo */
+  #mpane-edit{background:var(--surface)}
+  /* painel preview = iframe */
+  #mpane-preview{background:#1a1614}
+  #mpane-preview iframe{width:100%;height:100%;border:none;flex:1}
+}
+@media(min-width:769px){
+  .sidebar{display:block}
+  .preview-panel{display:flex}
+  .mobile-tabs{display:none}
+  .mobile-panel{display:none}
+}
 </style>
 </head>
 <body>
 
-<div class="topbar">
-  <div class="topbar-brand">🛠 Editor de App <span>/ Agendamento</span></div>
-  <div class="topbar-actions">
-    <button class="tbtn tbtn-ghost" onclick="resetAll()">↺ Resetar</button>
-    <button class="tbtn tbtn-gold" onclick="exportHTML()">⬇ Exportar HTML</button>
+<!-- ════════════════════════════════════
+     SCREEN: AUTH
+════════════════════════════════════ -->
+<div class="screen active" id="screen-auth">
+  <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;padding:2rem 1.25rem;background:radial-gradient(ellipse at 50% -20%,rgba(201,169,110,.12) 0%,transparent 60%)">
+    <div class="auth-logo">
+      <div class="auth-logo-name">AgendVirtual</div>
+      <div class="auth-logo-sub">Sistema de Agendamento</div>
+    </div>
+
+    <div class="auth-card">
+      <div class="auth-tabs">
+        <button class="auth-tab active" onclick="switchAuthTab('login')">Entrar</button>
+        <button class="auth-tab" onclick="switchAuthTab('register')">Cadastrar</button>
+      </div>
+
+      <!-- LOGIN -->
+      <div class="auth-form" id="form-login">
+        <div><span class="field-label">E-mail</span><input class="field-input" id="login-email" type="email" placeholder="seu@email.com" autocomplete="email"></div>
+        <div><span class="field-label">Senha</span><input class="field-input" id="login-pass" type="password" placeholder="••••••••" autocomplete="current-password"></div>
+        <p class="auth-err" id="login-err"></p>
+        <button class="btn-auth btn-auth-primary" onclick="doLogin()">Entrar</button>
+        <p class="auth-note">Ainda não tem conta? <a href="#" onclick="switchAuthTab('register');return false" style="color:var(--gold)">Cadastre-se grátis</a></p>
+      </div>
+
+      <!-- REGISTER -->
+      <div class="auth-form hidden" id="form-register">
+        <div><span class="field-label">Nome do estabelecimento</span><input class="field-input" id="reg-name" type="text" placeholder="Ex: Nail Studio da Ana" autocomplete="organization"></div>
+        <div><span class="field-label">E-mail</span><input class="field-input" id="reg-email" type="email" placeholder="seu@email.com" autocomplete="email"></div>
+        <div><span class="field-label">Senha</span><input class="field-input" id="reg-pass" type="password" placeholder="Mínimo 6 caracteres" autocomplete="new-password"></div>
+        <div><span class="field-label">Confirmar senha</span><input class="field-input" id="reg-pass2" type="password" placeholder="Repita a senha" autocomplete="new-password"></div>
+        <p class="auth-err" id="reg-err"></p>
+        <button class="btn-auth btn-auth-primary" onclick="doRegister()">Criar conta grátis</button>
+        <p class="auth-note">✓ 3 dias grátis, sem cartão • R$29,90/mês após</p>
+      </div>
+    </div>
   </div>
 </div>
 
-<div class="editor-layout">
-  <div class="sidebar">
+<!-- ════════════════════════════════════
+     SCREEN: TRIAL WELCOME
+════════════════════════════════════ -->
+<div class="screen" id="screen-trial">
+  <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;padding:2rem 1.25rem;background:radial-gradient(ellipse at 50% -10%,rgba(201,169,110,.1) 0%,transparent 60%)">
+    <div class="info-card">
+      <div class="info-icon">🎉</div>
+      <div class="trial-badge">Período de Avaliação</div>
+      <div class="info-title">Bem-vindo(a), <span id="trial-name-disp" style="color:var(--gold)">!</span></div>
+      <div class="trial-days" id="trial-days-left">3</div>
+      <div class="trial-days-label">dias grátis</div>
+      <p class="info-sub" style="margin-top:1rem">Personalize seu app de agendamento e envie para seus clientes. Após o período gratuito, continue por apenas R$29,90/mês.</p>
+      <button class="btn-cta btn-cta-gold" onclick="goToEditor()">Começar a personalizar →</button>
+      <button class="btn-cta btn-cta-ghost" onclick="goToPaywall()">Assinar agora e não perder acesso</button>
+    </div>
+  </div>
+</div>
 
-    <!-- IDENTIDADE -->
-    <div class="sidebar-section">
-      <button class="sidebar-toggle open" onclick="toggleSection(this)">🏢 Identidade da empresa <span class="arrow">▼</span></button>
-      <div class="sidebar-body open">
-        <div>
-          <span class="field-label">Logo da empresa</span>
-          <div class="logo-upload-area" onclick="document.getElementById('logoInput').click()">
-            <input type="file" id="logoInput" accept="image/*" onchange="uploadLogo(this)">
-            <img id="logoPreview" class="logo-preview">
-            <div class="upload-hint" id="uploadHint">Clique para enviar seu logo<br><span style="font-size:10px;color:#444">PNG, JPG ou SVG — fundo transparente recomendado</span></div>
-          </div>
+<!-- ════════════════════════════════════
+     SCREEN: PAYWALL
+════════════════════════════════════ -->
+<div class="screen" id="screen-paywall">
+  <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;padding:2rem 1.25rem;background:radial-gradient(ellipse at 50% -10%,rgba(201,169,110,.1) 0%,transparent 60%)">
+    <div class="info-card">
+      <div class="info-icon">🔒</div>
+      <div class="info-title">Período gratuito encerrado</div>
+      <p class="info-sub">Para continuar personalizando e enviando seu link de agendamento, assine o plano mensal.</p>
+      <div class="pay-price">R$29<span style="font-size:1.8rem">,90</span></div>
+      <div class="pay-period">por mês • cancele quando quiser</div>
+      <div class="pay-features">
+        <div class="pay-feat">App de agendamento personalizado</div>
+        <div class="pay-feat">Link exclusivo para seus clientes</div>
+        <div class="pay-feat">Edição ilimitada de serviços e profissionais</div>
+        <div class="pay-feat">10 estilos visuais de cards</div>
+        <div class="pay-feat">Cores, logo e temas personalizados</div>
+        <div class="pay-feat">Suporte por WhatsApp</div>
+      </div>
+      <a href="https://mpago.la/2QjwYAD" target="_blank" style="text-decoration:none;display:block">
+        <button class="btn-cta btn-cta-gold" onclick="simulatePay()">💳 Assinar agora — R$29,90/mês</button>
+      </a>
+      <button class="btn-cta btn-cta-ghost" onclick="goToEditor()" id="btn-trial-continue" style="display:none">Continuar com trial</button>
+      <p style="font-size:10px;color:#444;text-align:center;margin-top:.5rem">Pagamento seguro via Mercado Pago</p>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     SCREEN: EDITOR
+════════════════════════════════════ -->
+<div class="screen" id="screen-editor">
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="topbar-brand">AgendVirtual <span id="topbar-biz-name">/ Painel</span></div>
+    <div class="topbar-right">
+      <span class="trial-info" id="topbar-trial-badge">● 3 dias grátis</span>
+      <button class="tbtn tbtn-gold" onclick="openShareModal()" style="display:none" id="btn-share">📤 Enviar link</button>
+      <button class="tbtn tbtn-gold" id="btn-share-desktop" onclick="openShareModal()">📤 Enviar link</button>
+      <button class="tbtn tbtn-red" onclick="doLogout()">Sair</button>
+    </div>
+  </div>
+
+  <!-- DESKTOP LAYOUT -->
+  <div class="editor-layout">
+
+    <!-- SIDEBAR (desktop) -->
+    <div class="sidebar" id="sidebar-desktop">
+      <!-- conteúdo injetado por buildSidebarContent() -->
+    </div>
+
+    <!-- PREVIEW (desktop) -->
+    <div class="preview-panel">
+      <div class="preview-bar">
+        <div class="preview-dots">
+          <div class="p-dot" style="background:#ff5f57"></div>
+          <div class="p-dot" style="background:#ffbd2e"></div>
+          <div class="p-dot" style="background:#28c840"></div>
         </div>
-        <div><span class="field-label">Nome do negócio</span><input class="field-input" id="cfg-bizname" value="Espaço Beleza" oninput="updatePreview()"></div>
-        <div><span class="field-label">Subtítulo / slogan</span><input class="field-input" id="cfg-tagline" value="Studio & Spa" oninput="updatePreview()"></div>
-        <div>
-          <span class="field-label">Tipo de negócio</span>
-          <select class="field-input" id="cfg-type" onchange="applyType()">
-            <option value="custom">Personalizado</option>
-            <option value="salao">Salão de Beleza</option>
-            <option value="airdesigner">Air Designer</option>
-            <option value="barbearia">Barbearia</option>
-            <option value="tatuagem">Estúdio de Tatuagem</option>
-            <option value="estetica">Clínica de Estética</option>
-            <option value="nail">Nail Designer</option>
-            <option value="massagem">Massoterapia / Spa</option>
-            <option value="personal">Personal Trainer</option>
-          </select>
+        <span class="preview-label">Prévia em tempo real</span>
+        <span class="preview-share" onclick="openShareModal()">📤 Gerar link do cliente</span>
+      </div>
+      <div class="preview-frame-wrap">
+        <iframe id="preview" scrolling="yes"></iframe>
+      </div>
+    </div>
+  </div>
+
+  <!-- MOBILE LAYOUT -->
+  <div class="mobile-panel">
+    <div class="mobile-panel-pane active" id="mpane-edit">
+      <!-- conteúdo injetado -->
+    </div>
+    <div class="mobile-panel-pane" id="mpane-preview">
+      <iframe id="preview-mobile" scrolling="yes" style="width:100%;flex:1;border:none;min-height:calc(100vh - 130px)"></iframe>
+    </div>
+  </div>
+
+  <!-- MOBILE TABS -->
+  <div class="mobile-tabs" id="mobile-tabs">
+    <button class="mob-tab active" id="mobtab-edit" onclick="switchMobTab('edit')">
+      <span class="mob-icon">✏️</span>Editar
+    </button>
+    <button class="mob-tab" id="mobtab-preview" onclick="switchMobTab('preview')">
+      <span class="mob-icon">👁</span>Prévia
+    </button>
+    <button class="mob-tab" id="mobtab-share" onclick="openShareModal()">
+      <span class="mob-icon">📤</span>Enviar
+    </button>
+  </div>
+
+</div><!-- /screen-editor -->
+
+<!-- ═══════════ SHARE MODAL ═══════════ -->
+<div class="modal-backdrop" id="shareModal">
+  <div class="modal">
+    <h3>📤 Link do cliente</h3>
+    <p>Copie e envie este link para seus clientes agendarem. A página abrirá diretamente no app, sem painel de edição.</p>
+    <div class="modal-link-box" id="share-link-display">—</div>
+    <p style="font-size:11px;color:#555;margin-bottom:.75rem">Este link reflete as configurações que você salvou. Para atualizar, salve novamente.</p>
+    <div class="modal-btns">
+      <button class="mbtn mbtn-ghost" onclick="closeShareModal()">Fechar</button>
+      <button class="mbtn mbtn-gold" onclick="copyShareLink()">📋 Copiar link</button>
+    </div>
+    <div id="share-copied" style="text-align:center;font-size:11px;color:var(--green);margin-top:.5rem;min-height:14px"></div>
+  </div>
+</div>
+
+<!-- ═══════════ SAVE CONFIRM MODAL ═══════════ -->
+<div class="modal-backdrop" id="saveModal">
+  <div class="modal">
+    <h3>✓ Configurações salvas</h3>
+    <p>Seu app de agendamento foi atualizado. Envie o link abaixo para seus clientes.</p>
+    <div class="modal-link-box" id="save-link-display">—</div>
+    <div class="modal-btns">
+      <button class="mbtn mbtn-ghost" onclick="closeSaveModal()">Fechar</button>
+      <button class="mbtn mbtn-gold" onclick="copySaveLink()">📋 Copiar link</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════
+   SIMPLE LOCAL AUTH (localStorage)
+   Em produção: substituir por backend real
+═══════════════════════════════════════════════════════ */
+var STORAGE_KEY = 'agendvirtual_users';
+var SESSION_KEY = 'agendvirtual_session';
+var CONFIG_KEY  = 'agendvirtual_config_';
+
+function getUsers(){ try{return JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}')}catch(e){return{}} }
+function saveUsers(u){ localStorage.setItem(STORAGE_KEY, JSON.stringify(u)) }
+function getSession(){ try{return JSON.parse(localStorage.getItem(SESSION_KEY)||'null')}catch(e){return null} }
+function saveSession(s){ localStorage.setItem(SESSION_KEY, JSON.stringify(s)) }
+function clearSession(){ localStorage.removeItem(SESSION_KEY) }
+function getUserConfig(email){ try{return JSON.parse(localStorage.getItem(CONFIG_KEY+email)||'null')}catch(e){return null} }
+function saveUserConfig(email,data){ localStorage.setItem(CONFIG_KEY+email, JSON.stringify(data)) }
+
+function switchAuthTab(tab){
+  document.querySelectorAll('.auth-tab').forEach(function(t){t.classList.remove('active')});
+  document.getElementById('form-login').classList.toggle('hidden', tab!=='login');
+  document.getElementById('form-register').classList.toggle('hidden', tab!=='register');
+  document.querySelectorAll('.auth-tab')[tab==='login'?0:1].classList.add('active');
+}
+
+function doRegister(){
+  var name  = document.getElementById('reg-name').value.trim();
+  var email = document.getElementById('reg-email').value.trim().toLowerCase();
+  var pass  = document.getElementById('reg-pass').value;
+  var pass2 = document.getElementById('reg-pass2').value;
+  var err   = document.getElementById('reg-err');
+  if(!name){err.textContent='Informe o nome do estabelecimento.';return}
+  if(!email||!email.includes('@')){err.textContent='E-mail inválido.';return}
+  if(pass.length<6){err.textContent='Senha deve ter ao menos 6 caracteres.';return}
+  if(pass!==pass2){err.textContent='As senhas não coincidem.';return}
+  var users = getUsers();
+  if(users[email]){err.textContent='E-mail já cadastrado. Faça login.';return}
+  var trialExpiry = Date.now() + 3*24*60*60*1000;
+  users[email] = {name:name, pass:pass, trialExpiry:trialExpiry, paid:false};
+  saveUsers(users);
+  var sess = {email:email, name:name, trialExpiry:trialExpiry, paid:false};
+  saveSession(sess);
+  err.textContent='';
+  showTrialScreen(sess);
+}
+
+function doLogin(){
+  var email = document.getElementById('login-email').value.trim().toLowerCase();
+  var pass  = document.getElementById('login-pass').value;
+  var err   = document.getElementById('login-err');
+  var users = getUsers();
+  if(!users[email]){err.textContent='E-mail não encontrado.';return}
+  if(users[email].pass!==pass){err.textContent='Senha incorreta.';return}
+  var u = users[email];
+  var sess = {email:email, name:u.name, trialExpiry:u.trialExpiry, paid:u.paid};
+  saveSession(sess);
+  err.textContent='';
+  routeUser(sess);
+}
+
+function doLogout(){
+  clearSession();
+  location.reload();
+}
+
+function routeUser(sess){
+  if(sess.paid){ goToEditor(); return; }
+  if(Date.now() < sess.trialExpiry){ showTrialScreen(sess); return; }
+  showPaywall(false);
+}
+
+function showTrialScreen(sess){
+  var days = Math.max(0, Math.ceil((sess.trialExpiry - Date.now()) / (24*60*60*1000)));
+  document.getElementById('trial-name-disp').textContent = sess.name+'!';
+  document.getElementById('trial-days-left').textContent = days;
+  showScreen('trial');
+}
+
+function showPaywall(hasTrial){
+  document.getElementById('btn-trial-continue').style.display = hasTrial ? 'block' : 'none';
+  showScreen('paywall');
+}
+
+function goToPaywall(){ showPaywall(true); }
+
+function simulatePay(){
+  // Após pagamento real, marcar como pago:
+  // var sess = getSession(); var users = getUsers();
+  // users[sess.email].paid = true; sess.paid = true;
+  // saveUsers(users); saveSession(sess);
+}
+
+function goToEditor(){
+  var sess = getSession();
+  if(!sess){ showScreen('auth'); return; }
+  initEditor(sess);
+  showScreen('editor');
+}
+
+function showScreen(name){
+  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active')});
+  document.getElementById('screen-'+name).classList.add('active');
+}
+
+/* ═══════════════════════════════════════════════════════
+   ON LOAD: check session
+═══════════════════════════════════════════════════════ */
+window.addEventListener('DOMContentLoaded', function(){
+  var sess = getSession();
+  if(!sess){ showScreen('auth'); return; }
+  routeUser(sess);
+});
+
+/* ═══════════════════════════════════════════════════════
+   EDITOR STATE
+═══════════════════════════════════════════════════════ */
+var currentEmail = '';
+var cfg = {bizname:'Espaço Beleza',tagline:'Studio & Spa',accent:'#c9a96e',accent2:'#e8c98a',bg:'#0e0c0b',logoDataUrl:'',t1:'Qual serviço?',t2:'Sua profissional',succ:'Seu horário foi confirmado. Você receberá uma confirmação no WhatsApp.',footer:''};
+var cardStyle='classic', gridCols=2, iconSize='md', cardRadius=14;
+var services=[{icon:'✂️',name:'Corte Feminino',dur:'60 min',price:'R$ 80'},{icon:'🎨',name:'Coloração',dur:'120 min',price:'R$ 180'},{icon:'💆',name:'Progressiva',dur:'180 min',price:'R$ 250'},{icon:'💄',name:'Maquiagem',dur:'60 min',price:'R$ 120'},{icon:'💅',name:'Mani & Pedi',dur:'90 min',price:'R$ 70'},{icon:'🌿',name:'Hidratação',dur:'60 min',price:'R$ 90'}];
+var profs=[{name:'Ana Lima',spec:'Coloração & Cortes',rating:'4.9'},{name:'Camila Reis',spec:'Progressiva',rating:'4.8'},{name:'Fernanda Costa',spec:'Maquiagem & Unhas',rating:'4.7'}];
+
+var PRESETS={
+  salao:{bizname:'Espaço Beleza',tagline:'Studio & Spa',t1:'Qual serviço?',t2:'Sua profissional',services:[{icon:'✂️',name:'Corte Feminino',dur:'60 min',price:'R$ 80'},{icon:'🎨',name:'Coloração',dur:'120 min',price:'R$ 180'},{icon:'💆',name:'Progressiva',dur:'180 min',price:'R$ 250'},{icon:'💄',name:'Maquiagem',dur:'60 min',price:'R$ 120'}],profs:[{name:'Ana Lima',spec:'Coloração & Cortes',rating:'4.9'},{name:'Camila Reis',spec:'Progressiva',rating:'4.8'}]},
+  airdesigner:{bizname:'Air Studio',tagline:'Air Designer & Nail Art',t1:'Qual design?',t2:'Sua nail designer',services:[{icon:'💅',name:'Air Design Simples',dur:'90 min',price:'R$ 120'},{icon:'✨',name:'Air Design Premium',dur:'120 min',price:'R$ 180'},{icon:'🌸',name:'Nail Art Floral',dur:'60 min',price:'R$ 100'},{icon:'💎',name:'Nail Art Cristal',dur:'90 min',price:'R$ 150'},{icon:'🔮',name:'Encapsulado',dur:'120 min',price:'R$ 200'},{icon:'💫',name:'Manutenção',dur:'60 min',price:'R$ 80'}],profs:[{name:'Letícia Nails',spec:'Air Design & Nail Art',rating:'5.0'},{name:'Bruna Art',spec:'Encapsulado & Nail Art',rating:'4.9'}]},
+  barbearia:{bizname:'Barbearia Central',tagline:'Corte & Estilo',t1:'Qual serviço?',t2:'Seu barbeiro',services:[{icon:'💈',name:'Corte Masculino',dur:'30 min',price:'R$ 45'},{icon:'🪒',name:'Barba Completa',dur:'30 min',price:'R$ 40'},{icon:'✂️',name:'Corte + Barba',dur:'60 min',price:'R$ 75'},{icon:'🧴',name:'Hidratação Capilar',dur:'45 min',price:'R$ 60'}],profs:[{name:'Carlos Silva',spec:'Cortes & Barba',rating:'4.9'},{name:'Diego Barber',spec:'Degradê',rating:'4.8'}]},
+  nail:{bizname:'Nail Studio',tagline:'Nail Designer',t1:'Qual serviço?',t2:'Sua nail designer',services:[{icon:'💅',name:'Alongamento em Gel',dur:'120 min',price:'R$ 160'},{icon:'✨',name:'Esmaltação em Gel',dur:'60 min',price:'R$ 80'},{icon:'🌸',name:'Nail Art',dur:'90 min',price:'R$ 120'},{icon:'💎',name:'Manicure Completa',dur:'60 min',price:'R$ 70'}],profs:[{name:'Isabela Nails',spec:'Gel & Nail Art',rating:'4.9'},{name:'Thayná Art',spec:'Encapsulado',rating:'4.8'}]},
+  estetica:{bizname:'Clínica Beleza',tagline:'Estética Avançada',t1:'Qual tratamento?',t2:'Sua esteticista',services:[{icon:'✨',name:'Limpeza de Pele',dur:'60 min',price:'R$ 120'},{icon:'💆',name:'Botox Facial',dur:'45 min',price:'R$ 350'},{icon:'🌊',name:'Drenagem Linfática',dur:'60 min',price:'R$ 100'},{icon:'⚡',name:'Radiofrequência',dur:'60 min',price:'R$ 180'}],profs:[{name:'Dra. Paula',spec:'Dermato-estética',rating:'5.0'},{name:'Renata Skin',spec:'Tratamentos',rating:'4.9'}]},
+  massagem:{bizname:'Espaço Zen',tagline:'Massoterapia & Bem-estar',t1:'Qual massagem?',t2:'Seu massoterapeuta',services:[{icon:'🙌',name:'Massagem Relaxante',dur:'60 min',price:'R$ 130'},{icon:'💆',name:'Massagem Terapêutica',dur:'60 min',price:'R$ 150'},{icon:'🌿',name:'Pedras Quentes',dur:'90 min',price:'R$ 200'},{icon:'🧖',name:'Reflexologia',dur:'45 min',price:'R$ 100'}],profs:[{name:'Silvia Zen',spec:'Relaxante & Terapêutica',rating:'5.0'},{name:'Roberto Body',spec:'Terapêutica & Pedras',rating:'4.8'}]},
+  personal:{bizname:'FIT Studio',tagline:'Personal Training',t1:'Qual treino?',t2:'Seu personal trainer',services:[{icon:'🏋️',name:'Treino Musculação',dur:'60 min',price:'R$ 100'},{icon:'🏃',name:'Treino Funcional',dur:'45 min',price:'R$ 90'},{icon:'🧘',name:'Pilates',dur:'50 min',price:'R$ 110'},{icon:'🥊',name:'Muay Thai/Box',dur:'60 min',price:'R$ 95'}],profs:[{name:'Rodrigo Fit',spec:'Musculação & Funcional',rating:'4.9'},{name:'Aline Move',spec:'Pilates & Yoga',rating:'5.0'}]},
+};
+
+function initEditor(sess){
+  currentEmail = sess.email;
+  // atualizar topbar
+  document.getElementById('topbar-biz-name').textContent = '/ '+sess.name;
+  var days = Math.max(0, Math.ceil((sess.trialExpiry - Date.now()) / (24*60*60*1000)));
+  var badge = document.getElementById('topbar-trial-badge');
+  if(sess.paid){ badge.style.display='none'; }
+  else if(days>0){ badge.textContent='● '+days+' dia'+(days>1?'s':'')+' grátis'; badge.style.color='var(--green)'; }
+  else{ badge.textContent='● Trial expirado'; badge.style.color='var(--red)'; }
+  // carregar config salva
+  var saved = getUserConfig(sess.email);
+  if(saved){
+    if(saved.cfg) Object.assign(cfg, saved.cfg);
+    if(saved.services) services = saved.services;
+    if(saved.profs) profs = saved.profs;
+    if(saved.cardStyle) cardStyle = saved.cardStyle;
+    if(saved.gridCols) gridCols = saved.gridCols;
+    if(saved.iconSize) iconSize = saved.iconSize;
+    if(saved.cardRadius!==undefined) cardRadius = saved.cardRadius;
+  }
+  buildSidebarContent('sidebar-desktop');
+  buildSidebarContent('mpane-edit');
+  updatePreview();
+}
+
+/* ═══════════════════════════════════════════════════════
+   BUILD SIDEBAR HTML
+═══════════════════════════════════════════════════════ */
+function buildSidebarContent(containerId){
+  var c = document.getElementById(containerId);
+  c.innerHTML = sidebarHTML();
+  // re-bind values
+  document.querySelectorAll('#'+containerId+' [data-cfg]').forEach(function(el){
+    var k = el.getAttribute('data-cfg');
+    if(cfg[k]!==undefined) el.value = cfg[k];
+  });
+  // logo preview
+  if(cfg.logoDataUrl){
+    document.querySelectorAll('.logo-preview-img').forEach(function(img){img.src=cfg.logoDataUrl;img.style.display='block'});
+    document.querySelectorAll('.upload-hint').forEach(function(h){h.style.display='none'});
+  }
+  renderServicesList();
+  renderProfsList();
+  // card style active
+  document.querySelectorAll('.card-style-opt[data-style="'+cardStyle+'"]').forEach(function(el){el.classList.add('active')});
+  // ctrl buttons
+  activateCtrl('cols',gridCols);
+  activateCtrl('icn',iconSize);
+  activateCtrl('rad',cardRadius);
+  // theme dot
+  document.querySelectorAll('.theme-dot').forEach(function(d){
+    if(d.dataset.accent===cfg.accent) d.classList.add('active');
+  });
+}
+
+function sidebarHTML(){
+  return `
+  <div style="padding:.5rem 1rem;border-bottom:1px solid rgba(255,255,255,.05);display:flex;align-items:center;justify-content:space-between">
+    <span style="font-size:11px;color:#555;letter-spacing:.06em">Configurações do app</span>
+    <button onclick="saveConfig()" style="padding:.35rem .8rem;border-radius:7px;background:var(--gold);color:#0a0a0a;border:none;font-size:11px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;letter-spacing:.04em">💾 Salvar</button>
+  </div>
+
+  <!-- IDENTIDADE -->
+  <div class="sidebar-section">
+    <button class="sidebar-toggle open" onclick="toggleSection(this)">🏢 Identidade <span class="arrow">▼</span></button>
+    <div class="sidebar-body open">
+      <div>
+        <span class="field-label-s">Logo</span>
+        <div class="logo-upload-area" onclick="triggerLogo(this)">
+          <input type="file" accept="image/*" onchange="uploadLogo(this)" style="display:none">
+          <img class="logo-preview-img">
+          <div class="upload-hint">Clique para enviar logo<br><span style="font-size:10px;color:#333">PNG, JPG ou SVG</span></div>
+        </div>
+      </div>
+      <div><span class="field-label-s">Nome</span><input class="field-input-s" data-cfg="bizname" oninput="cfgInput(this,'bizname')" placeholder="Nome do negócio"></div>
+      <div><span class="field-label-s">Subtítulo</span><input class="field-input-s" data-cfg="tagline" oninput="cfgInput(this,'tagline')" placeholder="Slogan"></div>
+      <div><span class="field-label-s">Tipo de negócio</span>
+        <select class="field-input-s" onchange="applyType(this.value)">
+          <option value="">Personalizado</option>
+          <option value="salao">Salão de Beleza</option>
+          <option value="airdesigner">Air Designer</option>
+          <option value="barbearia">Barbearia</option>
+          <option value="nail">Nail Designer</option>
+          <option value="estetica">Clínica de Estética</option>
+          <option value="massagem">Massoterapia / Spa</option>
+          <option value="personal">Personal Trainer</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- ESTILO DOS CARDS -->
+  <div class="sidebar-section">
+    <button class="sidebar-toggle open" onclick="toggleSection(this)">✦ Estilo dos Cards <span class="arrow">▼</span></button>
+    <div class="sidebar-body open">
+      <div>
+        <span class="field-label-s">Layout visual</span>
+        <div class="card-gallery">
+          ${cardStyleOpts()}
+        </div>
+      </div>
+      <div class="divider"></div>
+      <div><span class="field-label-s">Colunas</span>
+        <div class="cols-row">
+          <button class="ctrl-btn" id="cols-1" onclick="setCols(1)">1 col</button>
+          <button class="ctrl-btn" id="cols-2" onclick="setCols(2)">2 cols</button>
+          <button class="ctrl-btn" id="cols-3" onclick="setCols(3)">3 cols</button>
+        </div>
+      </div>
+      <div><span class="field-label-s">Tamanho do ícone</span>
+        <div class="icon-size-row">
+          <button class="ctrl-btn" id="icn-sm" onclick="setIconSize('sm')">S</button>
+          <button class="ctrl-btn" id="icn-md" onclick="setIconSize('md')">M</button>
+          <button class="ctrl-btn" id="icn-lg" onclick="setIconSize('lg')">L</button>
+          <button class="ctrl-btn" id="icn-xl" onclick="setIconSize('xl')">XL</button>
+        </div>
+      </div>
+      <div><span class="field-label-s">Arredondamento</span>
+        <div class="radius-row">
+          <button class="ctrl-btn" id="rad-0" onclick="setRadius(0)">Reto</button>
+          <button class="ctrl-btn" id="rad-8" onclick="setRadius(8)">Suave</button>
+          <button class="ctrl-btn" id="rad-14" onclick="setRadius(14)">Médio</button>
+          <button class="ctrl-btn" id="rad-22" onclick="setRadius(22)">Redondo</button>
+        </div>
+      </div>
+      <div class="divider"></div>
+      <div class="toggle-row"><span class="toggle-lbl">Mostrar duração</span><label class="toggle-sw"><input type="checkbox" id="tog-dur" checked onchange="updatePreview()"><span class="toggle-track"></span></label></div>
+      <div class="toggle-row"><span class="toggle-lbl">Preço em destaque</span><label class="toggle-sw"><input type="checkbox" id="tog-price" checked onchange="updatePreview()"><span class="toggle-track"></span></label></div>
+      <div class="toggle-row"><span class="toggle-lbl">Animação ao selecionar</span><label class="toggle-sw"><input type="checkbox" id="tog-anim" checked onchange="updatePreview()"><span class="toggle-track"></span></label></div>
+      <div class="toggle-row"><span class="toggle-lbl">Badge "Mais popular"</span><label class="toggle-sw"><input type="checkbox" id="tog-badge" onchange="updatePreview()"><span class="toggle-track"></span></label></div>
+    </div>
+  </div>
+
+  <!-- CORES -->
+  <div class="sidebar-section">
+    <button class="sidebar-toggle" onclick="toggleSection(this)">🎨 Cores & Tema <span class="arrow">▼</span></button>
+    <div class="sidebar-body">
+      <div><span class="field-label-s">Temas prontos</span>
+        <div class="theme-row">
+          <div class="theme-dot" data-accent="#c9a96e" style="background:#c9a96e" onclick="applyTheme('#c9a96e','#e8c98a','#0e0c0b',this)"></div>
+          <div class="theme-dot" data-accent="#7c6bff" style="background:#7c6bff" onclick="applyTheme('#7c6bff','#a89fff','#0c0b14',this)"></div>
+          <div class="theme-dot" data-accent="#ff6b9d" style="background:#ff6b9d" onclick="applyTheme('#ff6b9d','#ffaacf','#14080f',this)"></div>
+          <div class="theme-dot" data-accent="#00c9a7" style="background:#00c9a7" onclick="applyTheme('#00c9a7','#4dffde','#08140f',this)"></div>
+          <div class="theme-dot" data-accent="#ff7849" style="background:#ff7849" onclick="applyTheme('#ff7849','#ffaa88','#140d08',this)"></div>
+          <div class="theme-dot" data-accent="#4da8da" style="background:#4da8da" onclick="applyTheme('#4da8da','#88ccff','#080f14',this)"></div>
+          <div class="theme-dot" data-accent="#e0e0e0" style="background:#e0e0e0" onclick="applyTheme('#e0e0e0','#ffffff','#0c0c0c',this)"></div>
+        </div>
+      </div>
+      <div><span class="field-label-s">Cor de destaque</span>
+        <div class="color-row">
+          <input type="color" class="color-picker" id="cfg-accent" value="${cfg.accent}" oninput="customAccent(this.value)">
+          <input class="field-input-s" id="cfg-accent-hex" value="${cfg.accent}" oninput="hexAccent(this.value)" style="flex:1">
+        </div>
+      </div>
+      <div><span class="field-label-s">Cor de fundo</span>
+        <div class="color-row">
+          <input type="color" class="color-picker" id="cfg-bg" value="${cfg.bg}" oninput="customBg(this.value)">
+          <input class="field-input-s" id="cfg-bg-hex" value="${cfg.bg}" oninput="hexBg(this.value)" style="flex:1">
         </div>
       </div>
     </div>
+  </div>
 
-    <!-- ESTILO DOS CARDS -->
-    <div class="sidebar-section">
-      <button class="sidebar-toggle open" onclick="toggleSection(this)">✦ Estilo dos Cards de Serviço <span class="arrow">▼</span></button>
-      <div class="sidebar-body open">
-
-        <div>
-          <span class="field-label">Layout visual</span>
-          <div class="card-gallery" id="cardStyleGallery">
-
-            <!-- 1: Clássico -->
-            <div class="card-style-opt active" data-style="classic" onclick="selectCardStyle(this,'classic')">
-              <div class="cso-preview" style="background:#181512;border:1px solid rgba(201,169,110,.25);border-radius:8px;flex-direction:column;gap:3px;">
-                <span style="font-size:16px">✂️</span>
-                <div style="width:36px;height:3px;background:rgba(201,169,110,.5);border-radius:2px"></div>
-                <div style="width:28px;height:2px;background:rgba(255,255,255,.15);border-radius:2px"></div>
-              </div>
-              <span class="cso-label">Clássico</span>
-            </div>
-
-            <!-- 2: Glow / Destaque -->
-            <div class="card-style-opt" data-style="glow" onclick="selectCardStyle(this,'glow')">
-              <div class="cso-preview" style="background:#181512;border:1px solid rgba(201,169,110,.6);border-radius:8px;box-shadow:0 0 10px rgba(201,169,110,.2);flex-direction:column;gap:3px;">
-                <span style="font-size:16px">✂️</span>
-                <div style="width:36px;height:3px;background:#c9a96e;border-radius:2px"></div>
-                <div style="width:28px;height:2px;background:rgba(255,255,255,.2);border-radius:2px"></div>
-              </div>
-              <span class="cso-label">Glow</span>
-            </div>
-
-            <!-- 3: Pill badge -->
-            <div class="card-style-opt" data-style="pill" onclick="selectCardStyle(this,'pill')">
-              <div class="cso-preview" style="background:#181512;border:1px solid rgba(255,255,255,.1);border-radius:8px;flex-direction:column;gap:4px;padding:6px;">
-                <div style="display:flex;align-items:center;gap:4px">
-                  <div style="background:rgba(201,169,110,.18);border-radius:20px;padding:2px 7px;font-size:9px;color:#c9a96e">✂️ Corte</div>
-                </div>
-                <div style="width:28px;height:2px;background:rgba(255,255,255,.15);border-radius:2px"></div>
-                <div style="width:22px;height:2px;background:rgba(201,169,110,.4);border-radius:2px"></div>
-              </div>
-              <span class="cso-label">Pill Badge</span>
-            </div>
-
-            <!-- 4: Solid fill -->
-            <div class="card-style-opt" data-style="solid" onclick="selectCardStyle(this,'solid')">
-              <div class="cso-preview" style="background:rgba(201,169,110,.15);border:1px solid rgba(201,169,110,.3);border-radius:8px;flex-direction:column;gap:3px;">
-                <span style="font-size:16px">✂️</span>
-                <div style="width:36px;height:3px;background:rgba(201,169,110,.8);border-radius:2px"></div>
-                <div style="width:28px;height:2px;background:rgba(255,255,255,.3);border-radius:2px"></div>
-              </div>
-              <span class="cso-label">Fundo Colorido</span>
-            </div>
-
-            <!-- 5: Left accent bar -->
-            <div class="card-style-opt" data-style="leftbar" onclick="selectCardStyle(this,'leftbar')">
-              <div class="cso-preview" style="background:#181512;border:1px solid rgba(255,255,255,.08);border-radius:8px;border-left:3px solid #c9a96e;padding:6px 8px;flex-direction:column;align-items:flex-start;gap:4px;">
-                <span style="font-size:14px">✂️</span>
-                <div style="width:36px;height:2px;background:rgba(255,255,255,.25);border-radius:2px"></div>
-                <div style="width:24px;height:2px;background:rgba(201,169,110,.5);border-radius:2px"></div>
-              </div>
-              <span class="cso-label">Barra Lateral</span>
-            </div>
-
-            <!-- 6: Icon circle -->
-            <div class="card-style-opt" data-style="circle" onclick="selectCardStyle(this,'circle')">
-              <div class="cso-preview" style="background:#181512;border:1px solid rgba(255,255,255,.1);border-radius:8px;flex-direction:column;align-items:center;gap:4px;">
-                <div style="width:28px;height:28px;border-radius:50%;background:rgba(201,169,110,.15);border:1px solid rgba(201,169,110,.4);display:flex;align-items:center;justify-content:center;font-size:13px">✂️</div>
-                <div style="width:32px;height:2px;background:rgba(255,255,255,.2);border-radius:2px"></div>
-              </div>
-              <span class="cso-label">Ícone Circular</span>
-            </div>
-
-            <!-- 7: Horizontal list -->
-            <div class="card-style-opt" data-style="horizontal" onclick="selectCardStyle(this,'horizontal')">
-              <div class="cso-preview" style="background:#181512;border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:6px;flex-direction:column;gap:5px;">
-                <div style="display:flex;align-items:center;gap:5px"><span style="font-size:13px">✂️</span><div style="flex:1"><div style="height:3px;background:rgba(255,255,255,.25);border-radius:2px;width:80%;margin-bottom:3px"></div><div style="height:2px;background:rgba(201,169,110,.5);border-radius:2px;width:50%"></div></div></div>
-                <div style="height:1px;background:rgba(255,255,255,.06)"></div>
-                <div style="display:flex;align-items:center;gap:5px"><span style="font-size:13px">💄</span><div style="flex:1"><div style="height:3px;background:rgba(255,255,255,.25);border-radius:2px;width:70%;margin-bottom:3px"></div><div style="height:2px;background:rgba(201,169,110,.5);border-radius:2px;width:40%"></div></div></div>
-              </div>
-              <span class="cso-label">Lista Horizontal</span>
-            </div>
-
-            <!-- 8: Glassmorphism -->
-            <div class="card-style-opt" data-style="glass" onclick="selectCardStyle(this,'glass')">
-              <div class="cso-preview" style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.15);border-radius:8px;backdrop-filter:blur(8px);flex-direction:column;gap:3px;">
-                <span style="font-size:16px">✂️</span>
-                <div style="width:36px;height:3px;background:rgba(255,255,255,.4);border-radius:2px"></div>
-                <div style="width:28px;height:2px;background:rgba(201,169,110,.5);border-radius:2px"></div>
-              </div>
-              <span class="cso-label">Glass</span>
-            </div>
-
-            <!-- 9: Top bar -->
-            <div class="card-style-opt" data-style="topbar" onclick="selectCardStyle(this,'topbar')">
-              <div class="cso-preview" style="background:#181512;border:1px solid rgba(255,255,255,.1);border-radius:8px;flex-direction:column;align-items:stretch;padding:0;overflow:hidden">
-                <div style="height:5px;background:#c9a96e;width:100%"></div>
-                <div style="padding:5px 6px;display:flex;flex-direction:column;gap:3px;align-items:center">
-                  <span style="font-size:13px">✂️</span>
-                  <div style="width:32px;height:2px;background:rgba(255,255,255,.25);border-radius:2px"></div>
-                </div>
-              </div>
-              <span class="cso-label">Topo Colorido</span>
-            </div>
-
-            <!-- 10: Price tag -->
-            <div class="card-style-opt" data-style="pricetag" onclick="selectCardStyle(this,'pricetag')">
-              <div class="cso-preview" style="background:#181512;border:1px solid rgba(255,255,255,.1);border-radius:8px;flex-direction:column;padding:5px;gap:3px;">
-                <span style="font-size:14px">✂️</span>
-                <div style="width:38px;height:2px;background:rgba(255,255,255,.25);border-radius:2px"></div>
-                <div style="align-self:flex-end;background:rgba(201,169,110,.2);border:1px solid rgba(201,169,110,.5);border-radius:20px;padding:1px 6px;font-size:9px;color:#c9a96e">R$ 80</div>
-              </div>
-              <span class="cso-label">Price Tag</span>
-            </div>
-
-          </div>
-        </div>
-
-        <div class="divider"></div>
-
-        <div>
-          <span class="field-label">Colunas do grid</span>
-          <div class="cols-row">
-            <button class="cols-btn" id="cols-1" onclick="setCols(1)">1 col</button>
-            <button class="cols-btn active" id="cols-2" onclick="setCols(2)">2 cols</button>
-            <button class="cols-btn" id="cols-3" onclick="setCols(3)">3 cols</button>
-          </div>
-        </div>
-
-        <div>
-          <span class="field-label">Tamanho do ícone</span>
-          <div class="icon-size-row">
-            <button class="icon-size-btn" id="icn-sm" onclick="setIconSize('sm')">S</button>
-            <button class="icon-size-btn active" id="icn-md" onclick="setIconSize('md')">M</button>
-            <button class="icon-size-btn" id="icn-lg" onclick="setIconSize('lg')">L</button>
-            <button class="icon-size-btn" id="icn-xl" onclick="setIconSize('xl')">XL</button>
-          </div>
-        </div>
-
-        <div>
-          <span class="field-label">Arredondamento dos cards</span>
-          <div class="radius-row">
-            <button class="radius-btn" id="rad-0" onclick="setRadius(0)">Reto</button>
-            <button class="radius-btn" id="rad-8" onclick="setRadius(8)">Suave</button>
-            <button class="radius-btn active" id="rad-14" onclick="setRadius(14)">Médio</button>
-            <button class="radius-btn" id="rad-22" onclick="setRadius(22)">Redondo</button>
-          </div>
-        </div>
-
-        <div class="divider"></div>
-
-        <div class="toggle-row">
-          <span class="toggle-label">Mostrar duração</span>
-          <label class="toggle-switch"><input type="checkbox" id="tog-dur" checked onchange="updatePreview()"><span class="toggle-track"></span></label>
-        </div>
-        <div class="toggle-row">
-          <span class="toggle-label">Mostrar preço em destaque</span>
-          <label class="toggle-switch"><input type="checkbox" id="tog-price" checked onchange="updatePreview()"><span class="toggle-track"></span></label>
-        </div>
-        <div class="toggle-row">
-          <span class="toggle-label">Animação ao selecionar</span>
-          <label class="toggle-switch"><input type="checkbox" id="tog-anim" checked onchange="updatePreview()"><span class="toggle-track"></span></label>
-        </div>
-        <div class="toggle-row">
-          <span class="toggle-label">Badge "Mais popular" no 1º item</span>
-          <label class="toggle-switch"><input type="checkbox" id="tog-badge" onchange="updatePreview()"><span class="toggle-track"></span></label>
-        </div>
-
-      </div>
+  <!-- SERVIÇOS -->
+  <div class="sidebar-section">
+    <button class="sidebar-toggle" onclick="toggleSection(this)">💼 Serviços <span class="arrow">▼</span></button>
+    <div class="sidebar-body">
+      <div class="item-list" id="services-list"></div>
+      <button class="add-btn" onclick="addService()">+ Adicionar serviço</button>
     </div>
+  </div>
 
-    <!-- CORES -->
-    <div class="sidebar-section">
-      <button class="sidebar-toggle" onclick="toggleSection(this)">🎨 Cores & Tema <span class="arrow">▼</span></button>
-      <div class="sidebar-body">
-        <div>
-          <span class="field-label">Temas prontos</span>
-          <div class="theme-row">
-            <div class="theme-dot active" style="background:#c9a96e" onclick="applyTheme('#c9a96e','#e8c98a','#0e0c0b')"></div>
-            <div class="theme-dot" style="background:#7c6bff" onclick="applyTheme('#7c6bff','#a89fff','#0c0b14')"></div>
-            <div class="theme-dot" style="background:#ff6b9d" onclick="applyTheme('#ff6b9d','#ffaacf','#14080f')"></div>
-            <div class="theme-dot" style="background:#00c9a7" onclick="applyTheme('#00c9a7','#4dffde','#08140f')"></div>
-            <div class="theme-dot" style="background:#ff7849" onclick="applyTheme('#ff7849','#ffaa88','#140d08')"></div>
-            <div class="theme-dot" style="background:#4da8da" onclick="applyTheme('#4da8da','#88ccff','#080f14')"></div>
-            <div class="theme-dot" style="background:#e0e0e0" onclick="applyTheme('#e0e0e0','#ffffff','#0c0c0c')"></div>
-          </div>
-        </div>
-        <div>
-          <span class="field-label">Cor de destaque (accent)</span>
-          <div class="color-row">
-            <input type="color" class="color-picker" id="cfg-accent" value="#c9a96e" oninput="customTheme()">
-            <input class="field-input" id="cfg-accent-hex" value="#c9a96e" oninput="hexTheme()" style="flex:1">
-          </div>
-        </div>
-        <div>
-          <span class="field-label">Cor de fundo</span>
-          <div class="color-row">
-            <input type="color" class="color-picker" id="cfg-bg" value="#0e0c0b" oninput="customTheme()">
-            <input class="field-input" id="cfg-bg-hex" value="#0e0c0b" oninput="hexBg()" style="flex:1">
-          </div>
-        </div>
-      </div>
+  <!-- PROFISSIONAIS -->
+  <div class="sidebar-section">
+    <button class="sidebar-toggle" onclick="toggleSection(this)">👤 Profissionais <span class="arrow">▼</span></button>
+    <div class="sidebar-body">
+      <div class="item-list" id="profs-list"></div>
+      <button class="add-btn" onclick="addProf()">+ Adicionar profissional</button>
     </div>
+  </div>
 
-    <!-- SERVIÇOS -->
-    <div class="sidebar-section">
-      <button class="sidebar-toggle" onclick="toggleSection(this)">💼 Serviços <span class="arrow">▼</span></button>
-      <div class="sidebar-body">
-        <div class="item-list" id="services-list"></div>
-        <button class="add-btn" onclick="addService()">+ Adicionar serviço</button>
-      </div>
+  <!-- TEXTOS -->
+  <div class="sidebar-section">
+    <button class="sidebar-toggle" onclick="toggleSection(this)">✏️ Textos <span class="arrow">▼</span></button>
+    <div class="sidebar-body">
+      <div><span class="field-label-s">Título passo 1</span><input class="field-input-s" data-cfg="t1" oninput="cfgInput(this,'t1')" placeholder="Qual serviço?"></div>
+      <div><span class="field-label-s">Título passo 2</span><input class="field-input-s" data-cfg="t2" oninput="cfgInput(this,'t2')" placeholder="Profissional"></div>
+      <div><span class="field-label-s">Mensagem de confirmação</span><textarea class="field-input-s" oninput="cfg.succ=this.value;updatePreview()">${cfg.succ}</textarea></div>
     </div>
+  </div>
 
-    <!-- PROFISSIONAIS -->
-    <div class="sidebar-section">
-      <button class="sidebar-toggle" onclick="toggleSection(this)">👤 Profissionais <span class="arrow">▼</span></button>
-      <div class="sidebar-body">
-        <div class="item-list" id="profs-list"></div>
-        <button class="add-btn" onclick="addProf()">+ Adicionar profissional</button>
-      </div>
-    </div>
-
-    <!-- TEXTOS -->
-    <div class="sidebar-section">
-      <button class="sidebar-toggle" onclick="toggleSection(this)">✏️ Textos & Mensagens <span class="arrow">▼</span></button>
-      <div class="sidebar-body">
-        <div><span class="field-label">Título — Passo 1</span><input class="field-input" id="cfg-t1" value="Qual serviço?" oninput="updatePreview()"></div>
-        <div><span class="field-label">Título — Passo 2</span><input class="field-input" id="cfg-t2" value="Sua profissional" oninput="updatePreview()"></div>
-        <div><span class="field-label">Mensagem de confirmação</span><textarea class="field-input" id="cfg-succ">Seu horário foi confirmado. Você receberá uma confirmação no WhatsApp.</textarea></div>
-        <div><span class="field-label">Rodapé / watermark</span><input class="field-input" id="cfg-footer" value="Demo — App de Agendamento" oninput="updatePreview()"></div>
-      </div>
-    </div>
-
-    <!-- HORÁRIOS -->
-    <div class="sidebar-section">
-      <button class="sidebar-toggle" onclick="toggleSection(this)">🕐 Horários de Atendimento <span class="arrow">▼</span></button>
-      <div class="sidebar-body">
-        <div>
-          <span class="field-label">Horários disponíveis (um por linha)</span>
-          <textarea class="field-input" id="cfg-slots" style="height:110px" oninput="updatePreview()">08:00
-08:30
+  <!-- HORÁRIOS -->
+  <div class="sidebar-section">
+    <button class="sidebar-toggle" onclick="toggleSection(this)">🕐 Horários <span class="arrow">▼</span></button>
+    <div class="sidebar-body">
+      <div><span class="field-label-s">Horários (um por linha)</span>
+        <textarea class="field-input-s" id="cfg-slots" style="height:100px" oninput="updatePreview()">08:00
 09:00
 09:30
 10:00
@@ -428,531 +756,337 @@ iframe#preview{width:100%;min-height:100%;border:none;display:block}
 15:30
 16:00
 16:30
-17:00
-17:30</textarea>
-        </div>
-        <div>
-          <span class="field-label">Dias bloqueados</span>
-          <div style="display:flex;gap:10px">
-            <label style="display:flex;align-items:center;gap:4px;font-size:12px;color:#aaa;cursor:pointer"><input type="checkbox" id="blk-dom" checked> Dom</label>
-            <label style="display:flex;align-items:center;gap:4px;font-size:12px;color:#aaa;cursor:pointer"><input type="checkbox" id="blk-sab"> Sáb</label>
-          </div>
-        </div>
+17:00</textarea>
+      </div>
+      <div style="display:flex;gap:10px">
+        <label style="display:flex;align-items:center;gap:4px;font-size:11px;color:#aaa;cursor:pointer"><input type="checkbox" id="blk-dom" checked> Dom</label>
+        <label style="display:flex;align-items:center;gap:4px;font-size:11px;color:#aaa;cursor:pointer"><input type="checkbox" id="blk-sab"> Sáb</label>
       </div>
     </div>
-
-  </div><!-- /sidebar -->
-
-  <!-- PREVIEW -->
-  <div class="preview-wrap">
-    <div class="preview-topbar">
-      <div class="preview-dots">
-        <div class="preview-dot" style="background:#ff5f57"></div>
-        <div class="preview-dot" style="background:#ffbd2e"></div>
-        <div class="preview-dot" style="background:#28c840"></div>
-      </div>
-      <span class="preview-label">Prévia em tempo real</span>
-    </div>
-    <div class="preview-frame-wrap">
-      <iframe id="preview" scrolling="yes"></iframe>
-    </div>
   </div>
-</div>
-
-<!-- MODAL -->
-<div class="modal-backdrop" id="exportModal">
-  <div class="modal">
-    <h3>✓ HTML exportado</h3>
-    <p>O arquivo <strong style="color:#c9a96e">agendamento.html</strong> foi baixado com todas as configurações. Abra em qualquer navegador ou hospede online.</p>
-    <p>Hospedagem gratuita: <span style="color:#c9a96e">Netlify Drop, Vercel, GitHub Pages</span></p>
-    <div class="modal-btns">
-      <button class="tbtn tbtn-ghost" style="flex:1" onclick="closeModal()">Fechar</button>
-      <button class="tbtn tbtn-gold" style="flex:1" onclick="exportHTML()">↺ Exportar novamente</button>
-    </div>
-  </div>
-</div>
-
-<script>
-/* =====================================================
-   STATE
-===================================================== */
-var cfg = {
-  bizname:'Espaço Beleza', tagline:'Studio & Spa',
-  accent:'#c9a96e', accent2:'#e8c98a', bg:'#0e0c0b',
-  logoDataUrl:'',
-  t1:'Qual serviço?', t2:'Sua profissional',
-  succ:'Seu horário foi confirmado. Você receberá uma confirmação no WhatsApp.',
-  footer:'Demo — App de Agendamento',
-};
-
-var cardStyle = 'classic';
-var gridCols  = 2;
-var iconSize  = 'md';   // sm / md / lg / xl
-var cardRadius = 14;
-
-var services = [
-  {icon:'✂️',name:'Corte Feminino',dur:'60 min',price:'R$ 80'},
-  {icon:'🎨',name:'Coloração',dur:'120 min',price:'R$ 180'},
-  {icon:'💆',name:'Progressiva',dur:'180 min',price:'R$ 250'},
-  {icon:'💄',name:'Maquiagem',dur:'60 min',price:'R$ 120'},
-  {icon:'💅',name:'Mani & Pedi',dur:'90 min',price:'R$ 70'},
-  {icon:'🌿',name:'Hidratação',dur:'60 min',price:'R$ 90'},
-];
-
-var profs = [
-  {name:'Ana Lima',spec:'Coloração & Cortes',rating:'4.9',atendings:'312'},
-  {name:'Camila Reis',spec:'Progressiva & Tratamentos',rating:'4.8',atendings:'198'},
-  {name:'Fernanda Costa',spec:'Maquiagem & Unhas',rating:'4.7',atendings:'145'},
-];
-
-/* =====================================================
-   PRESETS
-===================================================== */
-var PRESETS = {
-  salao:{bizname:'Espaço Beleza',tagline:'Studio & Spa',t1:'Qual serviço?',t2:'Sua profissional',
-    services:[{icon:'✂️',name:'Corte Feminino',dur:'60 min',price:'R$ 80'},{icon:'🎨',name:'Coloração',dur:'120 min',price:'R$ 180'},{icon:'💆',name:'Progressiva',dur:'180 min',price:'R$ 250'},{icon:'💄',name:'Maquiagem',dur:'60 min',price:'R$ 120'}],
-    profs:[{name:'Ana Lima',spec:'Coloração & Cortes',rating:'4.9',atendings:'312'},{name:'Camila Reis',spec:'Progressiva',rating:'4.8',atendings:'198'}]},
-  airdesigner:{bizname:'Air Studio',tagline:'Air Designer & Nail Art',t1:'Qual design?',t2:'Sua nail designer',
-    services:[{icon:'💅',name:'Air Design Simples',dur:'90 min',price:'R$ 120'},{icon:'✨',name:'Air Design Premium',dur:'120 min',price:'R$ 180'},{icon:'🌸',name:'Nail Art Floral',dur:'60 min',price:'R$ 100'},{icon:'💎',name:'Nail Art Cristal',dur:'90 min',price:'R$ 150'},{icon:'🔮',name:'Encapsulado',dur:'120 min',price:'R$ 200'},{icon:'💫',name:'Manutenção',dur:'60 min',price:'R$ 80'}],
-    profs:[{name:'Letícia Nails',spec:'Air Design & Nail Art',rating:'5.0',atendings:'420'},{name:'Bruna Art',spec:'Encapsulado & Nail Art',rating:'4.9',atendings:'280'}]},
-  barbearia:{bizname:'Barbearia Central',tagline:'Corte & Estilo',t1:'Qual serviço?',t2:'Seu barbeiro',
-    services:[{icon:'💈',name:'Corte Masculino',dur:'30 min',price:'R$ 45'},{icon:'🪒',name:'Barba Completa',dur:'30 min',price:'R$ 40'},{icon:'✂️',name:'Corte + Barba',dur:'60 min',price:'R$ 75'},{icon:'🧴',name:'Hidratação Capilar',dur:'45 min',price:'R$ 60'}],
-    profs:[{name:'Carlos Silva',spec:'Cortes & Barba',rating:'4.9',atendings:'510'},{name:'Diego Barber',spec:'Degradê & Navalhado',rating:'4.8',atendings:'340'}]},
-  tatuagem:{bizname:'Black Ink Studio',tagline:'Tattoo & Piercing',t1:'Que trabalho deseja?',t2:'Seu tatuador',
-    services:[{icon:'🖋️',name:'Tatuagem Pequena',dur:'60 min',price:'R$ 150'},{icon:'🎨',name:'Tatuagem Média',dur:'180 min',price:'R$ 350'},{icon:'🖼️',name:'Tatuagem Grande',dur:'300 min',price:'R$ 600'},{icon:'💎',name:'Piercing',dur:'30 min',price:'R$ 80'}],
-    profs:[{name:'Marcos Ink',spec:'Black Work & Fineline',rating:'5.0',atendings:'215'},{name:'Julia Art',spec:'Aquarela & Color',rating:'4.9',atendings:'180'}]},
-  estetica:{bizname:'Clínica Beleza',tagline:'Estética Avançada',t1:'Qual tratamento?',t2:'Sua esteticista',
-    services:[{icon:'✨',name:'Limpeza de Pele',dur:'60 min',price:'R$ 120'},{icon:'💆',name:'Botox Facial',dur:'45 min',price:'R$ 350'},{icon:'🌊',name:'Drenagem Linfática',dur:'60 min',price:'R$ 100'},{icon:'⚡',name:'Radiofrequência',dur:'60 min',price:'R$ 180'}],
-    profs:[{name:'Dra. Paula',spec:'Dermato-estética',rating:'5.0',atendings:'390'},{name:'Renata Skin',spec:'Limpeza & Tratamentos',rating:'4.9',atendings:'260'}]},
-  nail:{bizname:'Nail Studio',tagline:'Nail Designer',t1:'Qual serviço?',t2:'Sua nail designer',
-    services:[{icon:'💅',name:'Alongamento em Gel',dur:'120 min',price:'R$ 160'},{icon:'✨',name:'Esmaltação em Gel',dur:'60 min',price:'R$ 80'},{icon:'🌸',name:'Nail Art',dur:'90 min',price:'R$ 120'},{icon:'💎',name:'Manicure Completa',dur:'60 min',price:'R$ 70'}],
-    profs:[{name:'Isabela Nails',spec:'Gel & Nail Art',rating:'4.9',atendings:'360'},{name:'Thayná Art',spec:'Encapsulado',rating:'4.8',atendings:'210'}]},
-  massagem:{bizname:'Espaço Zen',tagline:'Massoterapia & Bem-estar',t1:'Qual massagem?',t2:'Seu massoterapeuta',
-    services:[{icon:'🙌',name:'Massagem Relaxante',dur:'60 min',price:'R$ 130'},{icon:'💆',name:'Massagem Terapêutica',dur:'60 min',price:'R$ 150'},{icon:'🌿',name:'Pedras Quentes',dur:'90 min',price:'R$ 200'},{icon:'🧖',name:'Reflexologia',dur:'45 min',price:'R$ 100'}],
-    profs:[{name:'Silvia Zen',spec:'Relaxante & Terapêutica',rating:'5.0',atendings:'450'},{name:'Roberto Body',spec:'Terapêutica & Pedras',rating:'4.8',atendings:'290'}]},
-  personal:{bizname:'FIT Studio',tagline:'Personal Training',t1:'Qual treino?',t2:'Seu personal trainer',
-    services:[{icon:'🏋️',name:'Treino Musculação',dur:'60 min',price:'R$ 100'},{icon:'🏃',name:'Treino Funcional',dur:'45 min',price:'R$ 90'},{icon:'🧘',name:'Pilates',dur:'50 min',price:'R$ 110'},{icon:'🥊',name:'Muay Thai/Box',dur:'60 min',price:'R$ 95'}],
-    profs:[{name:'Rodrigo Fit',spec:'Musculação & Funcional',rating:'4.9',atendings:'510'},{name:'Aline Move',spec:'Pilates & Yoga',rating:'5.0',atendings:'320'}]},
-};
-
-/* =====================================================
-   CARD STYLE SELECTION
-===================================================== */
-function selectCardStyle(el, style){
-  document.querySelectorAll('.card-style-opt').forEach(function(o){o.classList.remove('active')});
-  el.classList.add('active');
-  cardStyle = style;
-  updatePreview();
+  <div style="height:80px"></div>
+  `;
 }
 
-/* =====================================================
-   COLS / ICON SIZE / RADIUS
-===================================================== */
-function setCols(n){
-  gridCols = n;
-  document.querySelectorAll('.cols-btn').forEach(function(b){b.classList.remove('active')});
-  document.getElementById('cols-'+n).classList.add('active');
-  updatePreview();
-}
-function setIconSize(s){
-  iconSize = s;
-  document.querySelectorAll('.icon-size-btn').forEach(function(b){b.classList.remove('active')});
-  document.getElementById('icn-'+s).classList.add('active');
-  updatePreview();
-}
-function setRadius(r){
-  cardRadius = r;
-  document.querySelectorAll('.radius-btn').forEach(function(b){b.classList.remove('active')});
-  document.getElementById('rad-'+r).classList.add('active');
-  updatePreview();
-}
-
-/* =====================================================
-   SECTION TOGGLE
-===================================================== */
-function toggleSection(btn){
-  btn.classList.toggle('open');
-  btn.nextElementSibling.classList.toggle('open');
+function cardStyleOpts(){
+  var styles=[
+    {k:'classic',lbl:'Clássico',bg:'#181512',border:'rgba(201,169,110,.25)',inner:'<span style="font-size:15px">✂️</span><div style="width:32px;height:2px;background:rgba(201,169,110,.5);border-radius:2px;margin-top:3px"></div>'},
+    {k:'glow',lbl:'Glow',bg:'#181512',border:'rgba(201,169,110,.6)',shadow:'0 0 10px rgba(201,169,110,.2)',inner:'<span style="font-size:15px">✂️</span><div style="width:32px;height:2px;background:#c9a96e;border-radius:2px;margin-top:3px"></div>'},
+    {k:'pill',lbl:'Pill Badge',bg:'#181512',border:'rgba(255,255,255,.1)',inner:'<div style="background:rgba(201,169,110,.18);border-radius:20px;padding:2px 8px;font-size:9px;color:#c9a96e">✂️ Corte</div>'},
+    {k:'solid',lbl:'Fundo Color',bg:'rgba(201,169,110,.15)',border:'rgba(201,169,110,.3)',inner:'<span style="font-size:15px">✂️</span><div style="width:32px;height:2px;background:rgba(201,169,110,.8);border-radius:2px;margin-top:3px"></div>'},
+    {k:'leftbar',lbl:'Barra Lateral',bg:'#181512',border:'rgba(255,255,255,.08)',bleft:'3px solid #c9a96e',inner:'<span style="font-size:13px">✂️</span><div style="width:30px;height:2px;background:rgba(255,255,255,.25);border-radius:2px;margin-top:3px"></div>'},
+    {k:'circle',lbl:'Ícone Circ.',bg:'#181512',border:'rgba(255,255,255,.1)',inner:'<div style="width:26px;height:26px;border-radius:50%;background:rgba(201,169,110,.15);border:1px solid rgba(201,169,110,.4);display:flex;align-items:center;justify-content:center;font-size:12px">✂️</div>'},
+    {k:'horizontal',lbl:'Horizontal',bg:'#181512',border:'rgba(255,255,255,.1)',inner:'<div style="display:flex;align-items:center;gap:5px;width:90%"><span style="font-size:13px">✂️</span><div><div style="height:3px;background:rgba(255,255,255,.25);border-radius:2px;width:50px;margin-bottom:2px"></div><div style="height:2px;background:rgba(201,169,110,.5);border-radius:2px;width:35px"></div></div></div>'},
+    {k:'glass',lbl:'Glass',bg:'rgba(255,255,255,.04)',border:'rgba(255,255,255,.15)',inner:'<span style="font-size:15px">✂️</span><div style="width:32px;height:2px;background:rgba(255,255,255,.4);border-radius:2px;margin-top:3px"></div>'},
+    {k:'topbar',lbl:'Topo Color',bg:'#181512',border:'rgba(255,255,255,.1)',topline:true,inner:'<span style="font-size:13px">✂️</span><div style="width:28px;height:2px;background:rgba(255,255,255,.2);border-radius:2px;margin-top:3px"></div>'},
+    {k:'pricetag',lbl:'Price Tag',bg:'#181512',border:'rgba(255,255,255,.1)',inner:'<span style="font-size:13px">✂️</span><div style="align-self:flex-end;background:rgba(201,169,110,.2);border:1px solid rgba(201,169,110,.5);border-radius:20px;padding:1px 5px;font-size:8px;color:#c9a96e;margin-top:2px">R$ 80</div>'},
+  ];
+  return styles.map(function(s){
+    var sh = s.shadow?'box-shadow:'+s.shadow+';':'';
+    var bl = s.bleft?'border-left:'+s.bleft+';':'';
+    var tl = s.topline?'<div style="height:4px;background:#c9a96e;width:100%;border-radius:4px 4px 0 0;position:absolute;top:0;left:0"></div>':'';
+    return '<div class="card-style-opt" data-style="'+s.k+'" onclick="selectCardStyle(this,\''+s.k+'\')">'
+      +'<div class="cso-preview" style="background:'+s.bg+';border:1px solid '+s.border+';border-radius:5px;'+sh+bl+'flex-direction:column;align-items:center;justify-content:center;position:relative">'+tl+s.inner+'</div>'
+      +'<span class="cso-label">'+s.lbl+'</span>'
+      +'</div>';
+  }).join('');
 }
 
-/* =====================================================
-   LOGO
-===================================================== */
+/* ═══════════════════════════════════════════════════════
+   SIDEBAR CONTROLS
+═══════════════════════════════════════════════════════ */
+function toggleSection(btn){btn.classList.toggle('open');btn.nextElementSibling.classList.toggle('open')}
+function triggerLogo(area){area.querySelector('input[type=file]').click()}
 function uploadLogo(input){
-  var file = input.files[0]; if(!file) return;
-  var reader = new FileReader();
-  reader.onload = function(e){
-    cfg.logoDataUrl = e.target.result;
-    document.getElementById('logoPreview').src = cfg.logoDataUrl;
-    document.getElementById('logoPreview').style.display = 'block';
-    document.getElementById('uploadHint').style.display = 'none';
+  var file=input.files[0];if(!file)return;
+  var r=new FileReader();
+  r.onload=function(e){
+    cfg.logoDataUrl=e.target.result;
+    document.querySelectorAll('.logo-preview-img').forEach(function(img){img.src=cfg.logoDataUrl;img.style.display='block'});
+    document.querySelectorAll('.upload-hint').forEach(function(h){h.style.display='none'});
     updatePreview();
   };
-  reader.readAsDataURL(file);
+  r.readAsDataURL(file);
 }
-
-/* =====================================================
-   THEME
-===================================================== */
-function applyTheme(accent, accent2, bg){
-  cfg.accent=accent; cfg.accent2=accent2; cfg.bg=bg;
-  document.getElementById('cfg-accent').value=accent;
-  document.getElementById('cfg-accent-hex').value=accent;
-  document.getElementById('cfg-bg').value=bg;
-  document.getElementById('cfg-bg-hex').value=bg;
-  document.querySelectorAll('.theme-dot').forEach(function(d){
-    d.classList.remove('active');
-    if(d.style.background===accent) d.classList.add('active');
+function cfgInput(el,key){cfg[key]=el.value;updatePreview()}
+function activateCtrl(prefix,val){
+  document.querySelectorAll('[id^="'+prefix+'-"]').forEach(function(b){
+    b.classList.toggle('active', b.id===prefix+'-'+val);
   });
-  updatePreview();
 }
-function customTheme(){
-  cfg.accent=document.getElementById('cfg-accent').value;
-  cfg.accent2=lighten(cfg.accent,30);
-  document.getElementById('cfg-accent-hex').value=cfg.accent;
-  cfg.bg=document.getElementById('cfg-bg').value;
-  document.getElementById('cfg-bg-hex').value=cfg.bg;
+function selectCardStyle(el,style){
+  document.querySelectorAll('.card-style-opt').forEach(function(o){o.classList.remove('active')});
+  document.querySelectorAll('.card-style-opt[data-style="'+style+'"]').forEach(function(o){o.classList.add('active')});
+  cardStyle=style;updatePreview();
+}
+function setCols(n){gridCols=n;activateCtrl('cols',n);updatePreview()}
+function setIconSize(s){iconSize=s;activateCtrl('icn',s);updatePreview()}
+function setRadius(r){cardRadius=r;activateCtrl('rad',r);updatePreview()}
+function applyTheme(a,a2,bg,el){
+  cfg.accent=a;cfg.accent2=a2;cfg.bg=bg;
   document.querySelectorAll('.theme-dot').forEach(function(d){d.classList.remove('active')});
+  if(el)el.classList.add('active');
+  document.querySelectorAll('#cfg-accent').forEach(function(i){i.value=a});
+  document.querySelectorAll('#cfg-accent-hex').forEach(function(i){i.value=a});
+  document.querySelectorAll('#cfg-bg').forEach(function(i){i.value=bg});
+  document.querySelectorAll('#cfg-bg-hex').forEach(function(i){i.value=bg});
   updatePreview();
 }
-function hexTheme(){
-  var v=document.getElementById('cfg-accent-hex').value;
-  if(/^#[0-9a-fA-F]{6}$/.test(v)){cfg.accent=v;cfg.accent2=lighten(v,30);document.getElementById('cfg-accent').value=v;updatePreview();}
-}
-function hexBg(){
-  var v=document.getElementById('cfg-bg-hex').value;
-  if(/^#[0-9a-fA-F]{6}$/.test(v)){cfg.bg=v;document.getElementById('cfg-bg').value=v;updatePreview();}
-}
-function lighten(hex,amount){
-  var n=parseInt(hex.replace('#',''),16);
-  return '#'+((1<<24)|(Math.min(255,(n>>16)+amount)<<16)|(Math.min(255,((n>>8)&0xff)+amount)<<8)|Math.min(255,(n&0xff)+amount)).toString(16).slice(1);
-}
-
-/* =====================================================
-   APPLY TYPE
-===================================================== */
-function applyType(){
-  var t=document.getElementById('cfg-type').value;
-  if(t==='custom'||!PRESETS[t]) return;
+function customAccent(v){cfg.accent=v;cfg.accent2=lighten(v,30);document.querySelectorAll('#cfg-accent-hex').forEach(function(i){i.value=v});updatePreview()}
+function hexAccent(v){if(/^#[0-9a-fA-F]{6}$/.test(v)){cfg.accent=v;cfg.accent2=lighten(v,30);document.querySelectorAll('#cfg-accent').forEach(function(i){i.value=v});updatePreview()}}
+function customBg(v){cfg.bg=v;document.querySelectorAll('#cfg-bg-hex').forEach(function(i){i.value=v});updatePreview()}
+function hexBg(v){if(/^#[0-9a-fA-F]{6}$/.test(v)){cfg.bg=v;document.querySelectorAll('#cfg-bg').forEach(function(i){i.value=v});updatePreview()}}
+function lighten(hex,a){var n=parseInt(hex.replace('#',''),16);return '#'+((1<<24)|(Math.min(255,(n>>16)+a)<<16)|(Math.min(255,((n>>8)&0xff)+a)<<8)|Math.min(255,(n&0xff)+a)).toString(16).slice(1)}
+function applyType(t){
+  if(!t||!PRESETS[t])return;
   var p=PRESETS[t];
-  document.getElementById('cfg-bizname').value=p.bizname;
-  document.getElementById('cfg-tagline').value=p.tagline;
-  document.getElementById('cfg-t1').value=p.t1;
-  document.getElementById('cfg-t2').value=p.t2;
-  cfg.bizname=p.bizname; cfg.tagline=p.tagline; cfg.t1=p.t1; cfg.t2=p.t2;
+  cfg.bizname=p.bizname;cfg.tagline=p.tagline;cfg.t1=p.t1;cfg.t2=p.t2;
   services=p.services.map(function(s){return Object.assign({},s)});
   profs=p.profs.map(function(s){return Object.assign({},s)});
-  renderServicesList(); renderProfsList(); updatePreview();
+  document.querySelectorAll('[data-cfg="bizname"]').forEach(function(el){el.value=cfg.bizname});
+  document.querySelectorAll('[data-cfg="tagline"]').forEach(function(el){el.value=cfg.tagline});
+  document.querySelectorAll('[data-cfg="t1"]').forEach(function(el){el.value=cfg.t1});
+  document.querySelectorAll('[data-cfg="t2"]').forEach(function(el){el.value=cfg.t2});
+  renderServicesList();renderProfsList();updatePreview();
 }
 
-/* =====================================================
-   SERVICES LIST
-===================================================== */
+/* services */
 function renderServicesList(){
-  var list=document.getElementById('services-list');
-  list.innerHTML='';
-  services.forEach(function(s,i){
-    var div=document.createElement('div'); div.className='item-row';
-    div.innerHTML='<div class="item-row-top"><input class="field-input" style="max-width:48px;text-align:center" placeholder="✂️" value="'+s.icon+'" oninput="services['+i+'].icon=this.value;updatePreview()"><input class="field-input" placeholder="Nome" value="'+s.name+'" oninput="services['+i+'].name=this.value;updatePreview()"><button class="item-delete" onclick="removeService('+i+')">✕</button></div><div class="item-row-bottom"><input class="field-input" placeholder="Duração" value="'+s.dur+'" oninput="services['+i+'].dur=this.value;updatePreview()"><input class="field-input" placeholder="Preço" value="'+s.price+'" oninput="services['+i+'].price=this.value;updatePreview()"></div>';
-    list.appendChild(div);
+  document.querySelectorAll('#services-list').forEach(function(list){
+    list.innerHTML='';
+    services.forEach(function(s,i){
+      var div=document.createElement('div');div.className='item-row';
+      div.innerHTML='<div class="item-row-top"><input class="field-input-s" style="max-width:42px;text-align:center" value="'+s.icon+'" oninput="services['+i+'].icon=this.value;updatePreview()"><input class="field-input-s" placeholder="Nome" value="'+s.name+'" oninput="services['+i+'].name=this.value;updatePreview()"><button class="item-delete" onclick="removeService('+i+')">✕</button></div><div class="item-row-bottom"><input class="field-input-s" placeholder="Duração" value="'+s.dur+'" oninput="services['+i+'].dur=this.value;updatePreview()"><input class="field-input-s" placeholder="Preço" value="'+s.price+'" oninput="services['+i+'].price=this.value;updatePreview()"></div>';
+      list.appendChild(div);
+    });
   });
 }
-function addService(){services.push({icon:'⭐',name:'Novo Serviço',dur:'60 min',price:'R$ 0'});renderServicesList();updatePreview();}
-function removeService(i){services.splice(i,1);renderServicesList();updatePreview();}
+function addService(){services.push({icon:'⭐',name:'Novo Serviço',dur:'60 min',price:'R$ 0'});renderServicesList();updatePreview()}
+function removeService(i){services.splice(i,1);renderServicesList();updatePreview()}
 
-/* =====================================================
-   PROFS LIST
-===================================================== */
+/* profs */
 function renderProfsList(){
-  var list=document.getElementById('profs-list');
-  list.innerHTML='';
-  profs.forEach(function(p,i){
-    var div=document.createElement('div'); div.className='prof-row';
-    div.innerHTML='<div style="display:flex;align-items:center;gap:6px"><input class="field-input" style="flex:1" placeholder="Nome" value="'+p.name+'" oninput="profs['+i+'].name=this.value;updatePreview()"><button class="prof-delete" onclick="removeProf('+i+')">✕</button></div><div class="prof-row-grid"><input class="field-input" placeholder="Especialidade" value="'+p.spec+'" oninput="profs['+i+'].spec=this.value;updatePreview()"><input class="field-input" placeholder="Nota" value="'+p.rating+'" oninput="profs['+i+'].rating=this.value;updatePreview()"></div>';
-    list.appendChild(div);
+  document.querySelectorAll('#profs-list').forEach(function(list){
+    list.innerHTML='';
+    profs.forEach(function(p,i){
+      var div=document.createElement('div');div.className='prof-row';
+      div.innerHTML='<div style="display:flex;align-items:center;gap:5px"><input class="field-input-s" style="flex:1" placeholder="Nome" value="'+p.name+'" oninput="profs['+i+'].name=this.value;updatePreview()"><button class="item-delete" onclick="removeProf('+i+')">✕</button></div><div class="prof-row-grid"><input class="field-input-s" placeholder="Especialidade" value="'+p.spec+'" oninput="profs['+i+'].spec=this.value;updatePreview()"><input class="field-input-s" placeholder="Nota" value="'+p.rating+'" oninput="profs['+i+'].rating=this.value;updatePreview()"></div>';
+      list.appendChild(div);
+    });
   });
 }
-function addProf(){profs.push({name:'Novo Profissional',spec:'Especialidade',rating:'5.0',atendings:'0'});renderProfsList();updatePreview();}
-function removeProf(i){profs.splice(i,1);renderProfsList();updatePreview();}
+function addProf(){profs.push({name:'Novo Profissional',spec:'Especialidade',rating:'5.0'});renderProfsList();updatePreview()}
+function removeProf(i){profs.splice(i,1);renderProfsList();updatePreview()}
 
-/* =====================================================
-   READ INPUTS
-===================================================== */
-function readInputs(){
-  cfg.bizname=document.getElementById('cfg-bizname').value;
-  cfg.tagline=document.getElementById('cfg-tagline').value;
-  cfg.t1=document.getElementById('cfg-t1').value;
-  cfg.t2=document.getElementById('cfg-t2').value;
-  cfg.succ=document.getElementById('cfg-succ').value;
-  cfg.footer=document.getElementById('cfg-footer').value;
+/* ═══════════════════════════════════════════════════════
+   SAVE CONFIG
+═══════════════════════════════════════════════════════ */
+function saveConfig(){
+  if(!currentEmail)return;
+  var data={cfg:Object.assign({},cfg),services:services,profs:profs,cardStyle:cardStyle,gridCols:gridCols,iconSize:iconSize,cardRadius:cardRadius};
+  saveUserConfig(currentEmail, data);
+  var link = buildShareLink();
+  document.getElementById('save-link-display').textContent=link;
+  document.getElementById('saveModal').classList.add('show');
+}
+function closeSaveModal(){document.getElementById('saveModal').classList.remove('show')}
+function copySaveLink(){
+  navigator.clipboard.writeText(document.getElementById('save-link-display').textContent).catch(function(){});
+  document.getElementById('save-link-display').style.color='var(--green)';
+  setTimeout(function(){document.getElementById('save-link-display').style.color=''},1500);
 }
 
-/* =====================================================
-   BUILD CARD CSS + HTML  (per style)
-===================================================== */
-function getIconPx(){return {sm:'18px',md:'26px',lg:'34px',xl:'44px'}[iconSize]||'26px';}
+/* ═══════════════════════════════════════════════════════
+   SHARE LINK
+═══════════════════════════════════════════════════════ */
+function buildShareLink(){
+  // Link para o app do cliente (agendamento.html no mesmo repo)
+  var base = location.href.replace(/\/[^\/]*$/, '/');
+  return base + 'agendamento.html?u=' + encodeURIComponent(currentEmail);
+}
+function openShareModal(){
+  var link = buildShareLink();
+  document.getElementById('share-link-display').textContent=link;
+  document.getElementById('share-copied').textContent='';
+  document.getElementById('shareModal').classList.add('show');
+}
+function closeShareModal(){document.getElementById('shareModal').classList.remove('show')}
+function copyShareLink(){
+  var link=document.getElementById('share-link-display').textContent;
+  navigator.clipboard.writeText(link).then(function(){
+    document.getElementById('share-copied').textContent='✓ Link copiado!';
+    setTimeout(function(){document.getElementById('share-copied').textContent=''},2500);
+  }).catch(function(){
+    document.getElementById('share-copied').textContent='Copie manualmente o link acima';
+  });
+}
 
-function buildCardCSS(accent, accentRgb, bg, r){
+/* ═══════════════════════════════════════════════════════
+   MOBILE TABS
+═══════════════════════════════════════════════════════ */
+function switchMobTab(tab){
+  document.querySelectorAll('.mob-tab').forEach(function(t){t.classList.remove('active')});
+  document.getElementById('mobtab-'+tab).classList.add('active');
+  document.querySelectorAll('.mobile-panel-pane').forEach(function(p){p.classList.remove('active')});
+  document.getElementById('mpane-'+tab).classList.add('active');
+  if(tab==='preview') updateMobilePreview();
+}
+
+/* ═══════════════════════════════════════════════════════
+   BUILD APP HTML (para prévia e export)
+═══════════════════════════════════════════════════════ */
+function hexToRgb(hex){var n=parseInt(hex.replace('#',''),16);return((n>>16)&255)+','+(((n>>8)&255))+','+(n&255)}
+function addBr(hex,a){var n=parseInt(hex.replace('#',''),16);return '#'+((1<<24)|(Math.min(255,((n>>16)&255)+a)<<16)|(Math.min(255,((n>>8)&255)+a)<<8)|Math.min(255,(n&255)+a)).toString(16).slice(1)}
+
+function getIconPx(){return{sm:'18px',md:'26px',lg:'34px',xl:'44px'}[iconSize]||'26px'}
+function togVal(id){var el=document.getElementById(id);return el?el.checked:true}
+
+function buildCardCSS(accent,aRgb,bg,r){
   var R=r+'px';
+  var anim=togVal('tog-anim')?'.service-card.selected{transform:scale(1.02);}.service-card:active{transform:scale(.97);}':'';
   var base='.service-card{border-radius:'+R+';cursor:pointer;transition:all .3s;position:relative;overflow:hidden;}';
-  var anim=document.getElementById('tog-anim').checked
-    ? '.service-card.selected{transform:scale(1.02);} .service-card:active{transform:scale(0.97);}'
-    : '';
-
-  var styles = {
-    classic: `
-      .service-card{background:var(--surface);border:1px solid var(--border);padding:1.1rem;}
-      .service-card:hover{border-color:var(--border2);background:var(--surface2);}
-      .service-card.selected{border-color:var(--gold);background:rgba(${accentRgb},.08);}`,
-
-    glow: `
-      .service-card{background:var(--surface);border:1px solid var(--border);padding:1.1rem;}
-      .service-card:hover{border-color:var(--gold);box-shadow:0 0 14px rgba(${accentRgb},.25);}
-      .service-card.selected{border-color:var(--gold);background:rgba(${accentRgb},.07);box-shadow:0 0 20px rgba(${accentRgb},.3);}`,
-
-    pill: `
-      .service-card{background:var(--surface);border:1px solid var(--border);padding:1.1rem;}
-      .service-card:hover{border-color:var(--border2);}
-      .service-card.selected{border-color:var(--gold);background:rgba(${accentRgb},.07);}
-      .service-icon-wrap{display:inline-flex;align-items:center;gap:6px;background:rgba(${accentRgb},.12);border:1px solid rgba(${accentRgb},.25);border-radius:20px;padding:3px 10px 3px 6px;margin-bottom:.5rem;}
-      .service-icon{margin:0!important;}`,
-
-    solid: `
-      .service-card{background:rgba(${accentRgb},.08);border:1px solid rgba(${accentRgb},.2);padding:1.1rem;}
-      .service-card:hover{background:rgba(${accentRgb},.14);border-color:rgba(${accentRgb},.35);}
-      .service-card.selected{background:rgba(${accentRgb},.2);border-color:var(--gold);}`,
-
-    leftbar: `
-      .service-card{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--gold);padding:1rem 1.1rem;}
-      .service-card:hover{background:var(--surface2);border-color:var(--border2);border-left-color:var(--gold2);}
-      .service-card.selected{background:rgba(${accentRgb},.07);border-color:rgba(${accentRgb},.2);border-left-color:var(--gold);}`,
-
-    circle: `
-      .service-card{background:var(--surface);border:1px solid var(--border);padding:1.1rem;text-align:center;}
-      .service-card:hover{border-color:var(--border2);}
-      .service-card.selected{border-color:var(--gold);background:rgba(${accentRgb},.07);}
-      .service-icon-wrap{width:48px;height:48px;border-radius:50%;background:rgba(${accentRgb},.12);border:1px solid rgba(${accentRgb},.3);display:flex;align-items:center;justify-content:center;margin:0 auto .7rem;}
-      .service-icon{margin:0!important;}`,
-
-    horizontal: `
-      .service-card{background:var(--surface);border:1px solid var(--border);padding:.85rem 1rem;display:flex!important;flex-direction:row!important;align-items:center;gap:12px;}
-      .service-card:hover{border-color:var(--border2);}
-      .service-card.selected{border-color:var(--gold);background:rgba(${accentRgb},.07);}
-      .svc-text-col{flex:1;min-width:0;}
-      .service-icon{margin:0 0 0 0!important;flex-shrink:0;}`,
-
-    glass: `
-      .service-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.12);padding:1.1rem;backdrop-filter:blur(10px);}
-      .service-card:hover{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.22);}
-      .service-card.selected{border-color:var(--gold);background:rgba(${accentRgb},.1);}`,
-
-    topbar: `
-      .service-card{background:var(--surface);border:1px solid var(--border);padding:0;overflow:hidden;}
-      .service-card::before{content:'';display:block;height:4px;background:var(--gold);transition:.2s;}
-      .service-card:hover::before{height:6px;}
-      .service-card.selected::before{height:6px;background:var(--gold2);}
-      .service-card.selected{border-color:var(--gold);}
-      .card-inner{padding:1rem 1.1rem;}`,
-
-    pricetag: `
-      .service-card{background:var(--surface);border:1px solid var(--border);padding:1.1rem;}
-      .service-card:hover{border-color:var(--border2);}
-      .service-card.selected{border-color:var(--gold);background:rgba(${accentRgb},.07);}
-      .price-badge{display:inline-block;background:rgba(${accentRgb},.15);border:1px solid rgba(${accentRgb},.4);border-radius:20px;padding:3px 10px;font-size:13px;color:var(--gold);font-weight:500;margin-top:6px;}
-      .service-price{display:none!important;}`,
+  var map={
+    classic:'.service-card{background:var(--surface);border:1px solid var(--border);padding:1.1rem;}.service-card:hover{border-color:var(--border2);background:var(--surface2);}.service-card.selected{border-color:var(--gold);background:rgba('+aRgb+',.08);}',
+    glow:'.service-card{background:var(--surface);border:1px solid var(--border);padding:1.1rem;}.service-card:hover{border-color:var(--gold);box-shadow:0 0 14px rgba('+aRgb+',.25);}.service-card.selected{border-color:var(--gold);background:rgba('+aRgb+',.07);box-shadow:0 0 20px rgba('+aRgb+',.3);}',
+    pill:'.service-card{background:var(--surface);border:1px solid var(--border);padding:1.1rem;}.service-card:hover{border-color:var(--border2);}.service-card.selected{border-color:var(--gold);background:rgba('+aRgb+',.07);}.service-icon-wrap{display:inline-flex;align-items:center;gap:6px;background:rgba('+aRgb+',.12);border:1px solid rgba('+aRgb+',.25);border-radius:20px;padding:3px 10px 3px 6px;margin-bottom:.5rem;}.service-icon{margin:0!important;}',
+    solid:'.service-card{background:rgba('+aRgb+',.08);border:1px solid rgba('+aRgb+',.2);padding:1.1rem;}.service-card:hover{background:rgba('+aRgb+',.14);}.service-card.selected{background:rgba('+aRgb+',.2);border-color:var(--gold);}',
+    leftbar:'.service-card{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--gold);padding:1rem 1.1rem;}.service-card:hover{background:var(--surface2);}.service-card.selected{background:rgba('+aRgb+',.07);}',
+    circle:'.service-card{background:var(--surface);border:1px solid var(--border);padding:1.1rem;text-align:center;}.service-card:hover{border-color:var(--border2);}.service-card.selected{border-color:var(--gold);background:rgba('+aRgb+',.07);}.service-icon-wrap{width:48px;height:48px;border-radius:50%;background:rgba('+aRgb+',.12);border:1px solid rgba('+aRgb+',.3);display:flex;align-items:center;justify-content:center;margin:0 auto .7rem;}.service-icon{margin:0!important;}',
+    horizontal:'.service-card{background:var(--surface);border:1px solid var(--border);padding:.85rem 1rem;display:flex!important;flex-direction:row!important;align-items:center;gap:12px;}.service-card:hover{border-color:var(--border2);}.service-card.selected{border-color:var(--gold);background:rgba('+aRgb+',.07);}.svc-text-col{flex:1;min-width:0;}.service-icon{margin:0!important;flex-shrink:0;}',
+    glass:'.service-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.12);padding:1.1rem;backdrop-filter:blur(10px);}.service-card:hover{background:rgba(255,255,255,.07);}.service-card.selected{border-color:var(--gold);background:rgba('+aRgb+',.1);}',
+    topbar:'.service-card{background:var(--surface);border:1px solid var(--border);padding:0;overflow:hidden;}.service-card::before{content:\'\';display:block;height:4px;background:var(--gold);transition:.2s;}.service-card:hover::before{height:6px;}.service-card.selected{border-color:var(--gold);}.service-card.selected::before{height:6px;background:var(--gold2);}.card-inner{padding:1rem 1.1rem;}',
+    pricetag:'.service-card{background:var(--surface);border:1px solid var(--border);padding:1.1rem;}.service-card:hover{border-color:var(--border2);}.service-card.selected{border-color:var(--gold);background:rgba('+aRgb+',.07);}.price-badge{display:inline-block;background:rgba('+aRgb+',.15);border:1px solid rgba('+aRgb+',.4);border-radius:20px;padding:3px 10px;font-size:13px;color:var(--gold);font-weight:500;margin-top:6px;}.service-price{display:none!important;}',
   };
-
-  return base + (styles[cardStyle]||styles.classic) + anim;
+  return base+(map[cardStyle]||map.classic)+anim;
 }
 
-function buildCardHTML(s, idx){
-  var iconPx = getIconPx();
-  var showDur = document.getElementById('tog-dur').checked;
-  var showPrice = document.getElementById('tog-price').checked;
-  var showBadge = document.getElementById('tog-badge').checked && idx===0;
-  var badgeHTML = showBadge ? '<div style="position:absolute;top:8px;right:8px;background:rgba('+hexToRgb(cfg.accent)+',.2);border:1px solid rgba('+hexToRgb(cfg.accent)+',.5);border-radius:20px;padding:2px 8px;font-size:9px;color:var(--gold);letter-spacing:.05em;">Mais popular</div>' : '';
-
-  function esc(v){return String(v).replace(/'/g,"\\'").replace(/</g,'&lt;');}
-
-  var iconStyle = 'font-size:'+iconPx+';';
-  var inner = '';
-
-  if(cardStyle==='pill'){
-    inner='<div class="service-icon-wrap"><span class="service-icon" style="'+iconStyle+'">'+s.icon+'</span><span style="font-size:12px;color:var(--text)">'+esc(s.name)+'</span></div>'
-      +(showDur?'<div class="service-dur">'+esc(s.dur)+'</div>':'')
-      +(showPrice?'<div class="service-price">'+esc(s.price)+'</div>':'');
-  } else if(cardStyle==='circle'){
-    inner='<div class="service-icon-wrap"><span class="service-icon" style="'+iconStyle+'">'+s.icon+'</span></div>'
-      +'<div class="service-name">'+esc(s.name)+'</div>'
-      +(showDur?'<div class="service-dur">'+esc(s.dur)+'</div>':'')
-      +(showPrice?'<div class="service-price">'+esc(s.price)+'</div>':'');
-  } else if(cardStyle==='horizontal'){
-    inner='<span class="service-icon" style="'+iconStyle+'">'+s.icon+'</span>'
-      +'<div class="svc-text-col"><div class="service-name">'+esc(s.name)+'</div>'
-      +(showDur?'<div class="service-dur">'+esc(s.dur)+'</div>':'')+'</div>'
-      +(showPrice?'<div class="service-price" style="flex-shrink:0">'+esc(s.price)+'</div>':'');
-  } else if(cardStyle==='topbar'){
-    inner='<div class="card-inner">'
-      +'<div class="service-icon" style="'+iconStyle+'margin-bottom:.5rem">'+s.icon+'</div>'
-      +'<div class="service-name">'+esc(s.name)+'</div>'
-      +(showDur?'<div class="service-dur">'+esc(s.dur)+'</div>':'')
-      +(showPrice?'<div class="service-price">'+esc(s.price)+'</div>':'')
-      +'</div>';
-  } else if(cardStyle==='pricetag'){
-    inner='<div class="service-icon" style="'+iconStyle+'margin-bottom:.5rem">'+s.icon+'</div>'
-      +'<div class="service-name">'+esc(s.name)+'</div>'
-      +(showDur?'<div class="service-dur">'+esc(s.dur)+'</div>':'')
-      +(showPrice?'<div class="price-badge">'+esc(s.price)+'</div>':'');
-  } else {
-    inner='<div class="service-icon" style="'+iconStyle+'margin-bottom:.5rem">'+s.icon+'</div>'
-      +'<div class="service-name">'+esc(s.name)+'</div>'
-      +(showDur?'<div class="service-dur">'+esc(s.dur)+'</div>':'')
-      +(showPrice?'<div class="service-price">'+esc(s.price)+'</div>':'');
-  }
-
-  return '<div class="service-card" onclick="selectService(this,\''+esc(s.name)+'\',\''+esc(s.dur)+'\',\''+esc(s.price)+'\')">'
-    + badgeHTML + inner + '</div>';
+function buildCardHTML(s,idx){
+  var px=getIconPx(),showDur=togVal('tog-dur'),showPrice=togVal('tog-price');
+  var showBadge=togVal('tog-badge')&&idx===0;
+  var aRgb=hexToRgb(cfg.accent);
+  var badge=showBadge?'<div style="position:absolute;top:8px;right:8px;background:rgba('+aRgb+',.2);border:1px solid rgba('+aRgb+',.5);border-radius:20px;padding:2px 8px;font-size:9px;color:var(--gold);letter-spacing:.05em">Mais popular</div>':'';
+  function esc(v){return String(v).replace(/'/g,"\\'").replace(/</g,'&lt;')}
+  var iconSt='font-size:'+px+';';
+  var inner='';
+  var sel="selectService(this,'"+esc(s.name)+"','"+esc(s.dur)+"','"+esc(s.price)+"')";
+  if(cardStyle==='pill'){inner='<div class="service-icon-wrap"><span class="service-icon" style="'+iconSt+'">'+s.icon+'</span><span style="font-size:12px;color:var(--text)">'+esc(s.name)+'</span></div>'+(showDur?'<div class="service-dur">'+esc(s.dur)+'</div>':'')+(showPrice?'<div class="service-price">'+esc(s.price)+'</div>':'');}
+  else if(cardStyle==='circle'){inner='<div class="service-icon-wrap"><span class="service-icon" style="'+iconSt+'">'+s.icon+'</span></div><div class="service-name">'+esc(s.name)+'</div>'+(showDur?'<div class="service-dur">'+esc(s.dur)+'</div>':'')+(showPrice?'<div class="service-price">'+esc(s.price)+'</div>':'');}
+  else if(cardStyle==='horizontal'){inner='<span class="service-icon" style="'+iconSt+'">'+s.icon+'</span><div class="svc-text-col"><div class="service-name">'+esc(s.name)+'</div>'+(showDur?'<div class="service-dur">'+esc(s.dur)+'</div>':'')+'</div>'+(showPrice?'<div class="service-price" style="flex-shrink:0">'+esc(s.price)+'</div>':'');}
+  else if(cardStyle==='topbar'){inner='<div class="card-inner"><div class="service-icon" style="'+iconSt+'margin-bottom:.5rem">'+s.icon+'</div><div class="service-name">'+esc(s.name)+'</div>'+(showDur?'<div class="service-dur">'+esc(s.dur)+'</div>':'')+(showPrice?'<div class="service-price">'+esc(s.price)+'</div>':'')+'</div>';}
+  else if(cardStyle==='pricetag'){inner='<div class="service-icon" style="'+iconSt+'margin-bottom:.5rem">'+s.icon+'</div><div class="service-name">'+esc(s.name)+'</div>'+(showDur?'<div class="service-dur">'+esc(s.dur)+'</div>':'')+(showPrice?'<div class="price-badge">'+esc(s.price)+'</div>':'');}
+  else{inner='<div class="service-icon" style="'+iconSt+'margin-bottom:.5rem">'+s.icon+'</div><div class="service-name">'+esc(s.name)+'</div>'+(showDur?'<div class="service-dur">'+esc(s.dur)+'</div>':'')+(showPrice?'<div class="service-price">'+esc(s.price)+'</div>':'');}
+  return '<div class="service-card" onclick="'+sel+'">'+badge+inner+'</div>';
 }
 
-/* =====================================================
-   BUILD FULL HTML
-===================================================== */
-function hexToRgb(hex){
-  var n=parseInt(hex.replace('#',''),16);
-  return ((n>>16)&255)+','+(((n>>8)&255))+','+(n&255);
-}
-function addBrightness(hex,a){
-  var n=parseInt(hex.replace('#',''),16);
-  var r=Math.min(255,((n>>16)&0xff)+a),g=Math.min(255,((n>>8)&0xff)+a),b=Math.min(255,(n&0xff)+a);
-  return '#'+((1<<24)|(r<<16)|(g<<8)|b).toString(16).slice(1);
-}
-
-function buildHTML(){
-  readInputs();
-  var slots=document.getElementById('cfg-slots').value.split('\n').map(function(s){return s.trim()}).filter(Boolean);
-  var blockedDays=[];
-  if(document.getElementById('blk-dom').checked) blockedDays.push(0);
-  if(document.getElementById('blk-sab').checked) blockedDays.push(6);
-
-  var accent=cfg.accent, accentRgb=hexToRgb(accent), accent2=cfg.accent2||lighten(accent,30), bg=cfg.bg;
-  var surface=addBrightness(bg,8), surface2=addBrightness(bg,14);
-
-  var gridCSS = gridCols===1
-    ? '.service-grid{grid-template-columns:1fr;}'
-    : gridCols===3
-    ? '.service-grid{grid-template-columns:1fr 1fr 1fr;}'
-    : '.service-grid{grid-template-columns:1fr 1fr;}';
-
-  var cardCSS = buildCardCSS(accent, accentRgb, bg, cardRadius);
-  var svcHTML = services.map(function(s,i){return buildCardHTML(s,i)}).join('');
-
+function buildAppHTML(){
+  var slots=[];
+  var slotsEl=document.getElementById('cfg-slots');
+  if(slotsEl) slots=slotsEl.value.split('\n').map(function(s){return s.trim()}).filter(Boolean);
+  var blocked=[];
+  var blkDom=document.getElementById('blk-dom'),blkSab=document.getElementById('blk-sab');
+  if(blkDom&&blkDom.checked) blocked.push(0);
+  if(blkSab&&blkSab.checked) blocked.push(6);
+  var accent=cfg.accent,aRgb=hexToRgb(accent),accent2=cfg.accent2||lighten(accent,30),bg=cfg.bg;
+  var surface=addBr(bg,8),surface2=addBr(bg,14);
+  var gridCSS=gridCols===1?'grid-template-columns:1fr':gridCols===3?'grid-template-columns:1fr 1fr 1fr':'grid-template-columns:1fr 1fr';
+  var cardCSS=buildCardCSS(accent,aRgb,bg,cardRadius);
+  var svcHTML=services.map(function(s,i){return buildCardHTML(s,i)}).join('');
   var profColors=['#c9a96e','#a97abc','#7aacbc','#7abc97','#bc7a7a'];
-  var profHTML = profs.map(function(p,i){
+  var profHTML=profs.map(function(p,i){
     var col=profColors[i%profColors.length];
     var initials=p.name.split(' ').map(function(w){return w[0]||''}).slice(0,2).join('');
-    return '<div class="prof-card" onclick="selectProf(this,\''+p.name.replace(/'/g,"\\'")+'\')">'
-      +'<div class="prof-avatar" style="background:'+col+'22;color:'+col+'">'+initials+'</div>'
-      +'<div><div class="prof-name">'+p.name+'</div><div class="prof-spec">'+p.spec+'</div><div class="prof-stars">⭐ '+p.rating+'</div></div></div>';
-  }).join('')
-  +'<div class="prof-card" onclick="selectProf(this,\'Qualquer disponível\')">'
-  +'<div class="prof-avatar" style="background:rgba(138,126,114,.12);color:#8a7e72">?</div>'
-  +'<div><div class="prof-name">Qualquer disponível</div><div class="prof-spec">Primeiro horário livre</div><div class="prof-stars" style="color:#8a7e72">Mais rápido para agendar</div></div></div>';
-
-  var logoHTML = cfg.logoDataUrl
-    ? '<img src="'+cfg.logoDataUrl+'" style="max-height:54px;max-width:180px;object-fit:contain;display:block;margin:0 auto .4rem">'
-    : '';
+    return '<div class="prof-card" onclick="selectProf(this,\''+p.name.replace(/'/g,"\\'")+'\')"><div class="prof-avatar" style="background:'+col+'22;color:'+col+'">'+initials+'</div><div><div class="prof-name">'+p.name+'</div><div class="prof-spec">'+p.spec+'</div><div class="prof-stars">⭐ '+p.rating+'</div></div></div>';
+  }).join('')+'<div class="prof-card" onclick="selectProf(this,\'Qualquer disponível\')"><div class="prof-avatar" style="background:rgba(138,126,114,.12);color:#8a7e72">?</div><div><div class="prof-name">Qualquer disponível</div><div class="prof-spec">Primeiro horário livre</div></div></div>';
+  var logoHTML=cfg.logoDataUrl?'<img src="'+cfg.logoDataUrl+'" style="max-height:54px;max-width:180px;object-fit:contain;display:block;margin:0 auto .4rem">':'';
 
   return `<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>${cfg.bizname} — Agendamento</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
-:root{--bg:${bg};--surface:${surface};--surface2:${surface2};--gold:${accent};--gold2:${accent2};--text:#f0ebe4;--muted:#8a7e72;--border:rgba(${accentRgb},0.18);--border2:rgba(${accentRgb},0.35);--radius:${cardRadius}px;}
+:root{--bg:${bg};--surface:${surface};--surface2:${surface2};--gold:${accent};--gold2:${accent2};--text:#f0ebe4;--muted:#8a7e72;--border:rgba(${aRgb},0.18);--border2:rgba(${aRgb},0.35);--radius:${cardRadius}px;}
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-weight:300;min-height:100vh;overflow-x:hidden}
-body::before{content:'';position:fixed;top:-200px;right:-200px;width:600px;height:600px;background:radial-gradient(circle,rgba(${accentRgb},0.06) 0%,transparent 70%);pointer-events:none;z-index:0}
-header{text-align:center;padding:3rem 1.5rem 2rem}
-.logo-line{display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:.5rem}
-.logo-line::before{content:'';flex:1;max-width:80px;height:1px;background:linear-gradient(90deg,transparent,var(--gold))}
-.logo-line::after{content:'';flex:1;max-width:80px;height:1px;background:linear-gradient(90deg,var(--gold),transparent)}
-.logo-name{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:300;letter-spacing:.15em;color:var(--gold2)}
-.logo-sub{font-size:11px;letter-spacing:.35em;color:var(--muted);text-transform:uppercase;margin-top:2px}
-.steps{display:flex;justify-content:center;gap:0;margin:0 auto 2.5rem;max-width:480px;padding:0 1.5rem;position:relative}
-.step-connector{position:absolute;top:14px;left:50%;transform:translateX(-50%);width:60%;height:1px;background:var(--border2);z-index:0}
-.step{display:flex;flex-direction:column;align-items:center;gap:6px;flex:1;z-index:1}
-.step-dot{width:28px;height:28px;border-radius:50%;border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--muted);background:var(--bg);transition:all .4s}
-.step-dot.active{border-color:var(--gold);color:var(--gold);background:rgba(${accentRgb},.08)}
+html,body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-weight:300;min-height:100vh;overflow-x:hidden;-webkit-text-size-adjust:100%}
+body::before{content:'';position:fixed;top:-200px;right:-200px;width:500px;height:500px;background:radial-gradient(circle,rgba(${aRgb},0.06) 0%,transparent 70%);pointer-events:none;z-index:0}
+header{text-align:center;padding:2.5rem 1.25rem 1.5rem}
+.logo-line{display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:.4rem}
+.logo-line::before{content:'';flex:1;max-width:60px;height:1px;background:linear-gradient(90deg,transparent,var(--gold))}
+.logo-line::after{content:'';flex:1;max-width:60px;height:1px;background:linear-gradient(90deg,var(--gold),transparent)}
+.logo-name{font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:300;letter-spacing:.12em;color:var(--gold2)}
+.logo-sub{font-size:10px;letter-spacing:.3em;color:var(--muted);text-transform:uppercase;margin-top:2px}
+.steps{display:flex;justify-content:center;margin:0 auto 2rem;max-width:400px;padding:0 1.25rem;position:relative}
+.step-connector{position:absolute;top:13px;left:50%;transform:translateX(-50%);width:58%;height:1px;background:var(--border2);z-index:0}
+.step{display:flex;flex-direction:column;align-items:center;gap:5px;flex:1;z-index:1}
+.step-dot{width:26px;height:26px;border-radius:50%;border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--muted);background:var(--bg);transition:all .4s}
+.step-dot.active{border-color:var(--gold);color:var(--gold);background:rgba(${aRgb},.08)}
 .step-dot.done{border-color:var(--gold);background:var(--gold);color:${bg}}
-.step-label{font-size:10px;letter-spacing:.1em;color:var(--muted);text-transform:uppercase;text-align:center}
+.step-label{font-size:9px;letter-spacing:.08em;color:var(--muted);text-transform:uppercase;text-align:center}
 .step-label.active{color:var(--gold)}
-.container{max-width:480px;margin:0 auto;padding:0 1.5rem 4rem}
-.panel{display:none;animation:fadeIn .35s ease}
+.container{max-width:440px;margin:0 auto;padding:0 1.25rem 5rem;position:relative}
+.panel{display:none;animation:fadeIn .3s ease}
 .panel.active{display:block}
-@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-.section-title{font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:300;font-style:italic;color:var(--gold2);margin-bottom:.3rem}
-.section-sub{font-size:12px;color:var(--muted);letter-spacing:.05em;margin-bottom:1.5rem}
-.service-grid{display:grid;gap:10px;margin-bottom:1.5rem}
-${gridCSS}
-.service-name{font-size:13px;font-weight:400;color:var(--text);margin-bottom:3px}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.section-title{font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:300;font-style:italic;color:var(--gold2);margin-bottom:.25rem}
+.section-sub{font-size:11px;color:var(--muted);margin-bottom:1.25rem}
+.service-grid{display:grid;${gridCSS};gap:9px;margin-bottom:1.5rem}
+.service-name{font-size:13px;font-weight:400;color:var(--text);margin-bottom:2px}
 .service-dur{font-size:11px;color:var(--muted)}
-.service-price{font-size:14px;color:var(--gold);font-weight:500;margin-top:6px}
+.service-price{font-size:14px;color:var(--gold);font-weight:500;margin-top:5px}
 ${cardCSS}
-.prof-list{display:flex;flex-direction:column;gap:10px;margin-bottom:1.5rem}
-.prof-card{border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.1rem;cursor:pointer;transition:all .25s;background:var(--surface);display:flex;align-items:center;gap:14px}
+.prof-list{display:flex;flex-direction:column;gap:9px;margin-bottom:1.5rem}
+.prof-card{border:1px solid var(--border);border-radius:var(--radius);padding:.9rem 1rem;cursor:pointer;transition:all .25s;background:var(--surface);display:flex;align-items:center;gap:12px}
 .prof-card:hover{border-color:var(--border2)}
-.prof-card.selected{border-color:var(--gold);background:rgba(${accentRgb},.07)}
-.prof-avatar{width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:18px;flex-shrink:0}
+.prof-card.selected{border-color:var(--gold);background:rgba(${aRgb},.07)}
+.prof-avatar{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:16px;flex-shrink:0}
 .prof-name{font-size:14px;font-weight:400;color:var(--text)}
-.prof-spec{font-size:11px;color:var(--muted);margin-top:2px}
-.prof-stars{font-size:11px;color:var(--gold);margin-top:3px}
-.cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem}
-.cal-month{font-family:'Cormorant Garamond',serif;font-size:1.2rem;font-weight:300;color:var(--gold2)}
-.cal-nav{width:32px;height:32px;border:1px solid var(--border2);border-radius:8px;background:none;color:var(--gold);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:.2s}
-.cal-nav:hover{background:rgba(${accentRgb},.1)}
-.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:1.5rem}
-.cal-day-name{text-align:center;font-size:10px;letter-spacing:.1em;color:var(--muted);padding:4px 0;text-transform:uppercase}
-.cal-day{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:8px;font-size:13px;cursor:pointer;transition:.2s;border:1px solid transparent;color:var(--muted)}
+.prof-spec{font-size:11px;color:var(--muted);margin-top:1px}
+.prof-stars{font-size:11px;color:var(--gold);margin-top:2px}
+.cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:.9rem}
+.cal-month{font-family:'Cormorant Garamond',serif;font-size:1.15rem;font-weight:300;color:var(--gold2)}
+.cal-nav{width:30px;height:30px;border:1px solid var(--border2);border-radius:8px;background:none;color:var(--gold);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:.2s;-webkit-tap-highlight-color:transparent}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:1.25rem}
+.cal-day-name{text-align:center;font-size:9px;letter-spacing:.08em;color:var(--muted);padding:3px 0;text-transform:uppercase}
+.cal-day{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:7px;font-size:12px;cursor:pointer;transition:.2s;border:1px solid transparent;color:var(--muted);-webkit-tap-highlight-color:transparent}
 .cal-day.avail{color:var(--text)}
-.cal-day.avail:hover{border-color:var(--border2);background:var(--surface2)}
+.cal-day.avail:hover,.cal-day.avail:active{border-color:var(--border2);background:var(--surface2)}
 .cal-day.selected{background:var(--gold);color:${bg};font-weight:500;border-color:var(--gold)}
 .cal-day.today{border-color:var(--border2);color:var(--gold)}
 .cal-day.empty,.cal-day.past{opacity:0;pointer-events:none}
-.time-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:1.5rem}
-.time-slot{border:1px solid var(--border);border-radius:10px;padding:.6rem;text-align:center;font-size:13px;cursor:pointer;transition:.2s;color:var(--text);background:var(--surface)}
-.time-slot:hover{border-color:var(--border2)}
-.time-slot.selected{border-color:var(--gold);color:var(--gold);background:rgba(${accentRgb},.07)}
+.time-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:1.5rem}
+.time-slot{border:1px solid var(--border);border-radius:9px;padding:.6rem;text-align:center;font-size:13px;cursor:pointer;transition:.2s;color:var(--text);background:var(--surface);-webkit-tap-highlight-color:transparent}
+.time-slot:hover,.time-slot:active{border-color:var(--border2)}
+.time-slot.selected{border-color:var(--gold);color:var(--gold);background:rgba(${aRgb},.07)}
 .time-slot.busy{opacity:.3;pointer-events:none;text-decoration:line-through}
 .summary{border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);overflow:hidden;margin-bottom:1.5rem}
-.summary-header{background:rgba(${accentRgb},.08);padding:1rem 1.25rem;border-bottom:1px solid var(--border)}
-.summary-header p{font-family:'Cormorant Garamond',serif;font-size:1.1rem;color:var(--gold2)}
-.summary-body{padding:1.25rem}
-.sum-row{display:flex;justify-content:space-between;align-items:center;padding:.5rem 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:13px}
-.sum-row:last-child{border-bottom:none;padding-top:.75rem;margin-top:.25rem}
-.sum-label{color:var(--muted)}.sum-val{color:var(--text);font-weight:400}
+.sum-header{background:rgba(${aRgb},.08);padding:.9rem 1.1rem;border-bottom:1px solid var(--border)}
+.sum-header p{font-family:'Cormorant Garamond',serif;font-size:1rem;color:var(--gold2)}
+.sum-body{padding:1.1rem}
+.sum-row{display:flex;justify-content:space-between;align-items:center;padding:.45rem 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:12px}
+.sum-row:last-child{border-bottom:none;padding-top:.65rem;margin-top:.2rem}
+.sum-label{color:var(--muted)}.sum-val{color:var(--text)}
 .sum-total .sum-label{color:var(--text);font-weight:500}
-.sum-total .sum-val{color:var(--gold);font-size:16px;font-weight:500}
-.field{margin-bottom:1rem}
-.field label{display:block;font-size:11px;letter-spacing:.1em;color:var(--muted);text-transform:uppercase;margin-bottom:.4rem}
-.field input{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:.75rem 1rem;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;transition:.2s}
+.sum-total .sum-val{color:var(--gold);font-size:15px;font-weight:500}
+.field{margin-bottom:.9rem}
+.field label{display:block;font-size:10px;letter-spacing:.1em;color:var(--muted);text-transform:uppercase;margin-bottom:.35rem}
+.field input{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:.7rem .9rem;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;transition:.2s;-webkit-appearance:none}
 .field input:focus{border-color:var(--gold2)}
 .field input::placeholder{color:var(--muted)}
-.btn{width:100%;padding:.85rem;border-radius:12px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:400;letter-spacing:.08em;cursor:pointer;transition:all .25s;margin-bottom:.75rem}
+.btn{width:100%;padding:.8rem;border-radius:11px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:400;letter-spacing:.07em;cursor:pointer;transition:all .25s;margin-bottom:.65rem;-webkit-tap-highlight-color:transparent}
 .btn-primary{background:var(--gold);color:${bg};border:none}
-.btn-primary:hover{background:var(--gold2);transform:translateY(-1px)}
-.btn-primary:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.btn-primary:hover,.btn-primary:active{background:var(--gold2)}
+.btn-primary:disabled{opacity:.4;cursor:not-allowed}
 .btn-ghost{background:none;border:1px solid var(--border);color:var(--muted)}
-.btn-ghost:hover{border-color:var(--border2);color:var(--text)}
-.success-wrap{text-align:center;padding:2rem 1rem}
-.success-icon{width:72px;height:72px;border-radius:50%;border:1px solid var(--gold);display:flex;align-items:center;justify-content:center;margin:0 auto 1.5rem;font-size:28px;color:var(--gold)}
-.success-title{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:300;color:var(--gold2);margin-bottom:.5rem}
-.success-sub{font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:2rem}
-.confirm-code{background:var(--surface);border:1px solid var(--border2);border-radius:12px;padding:1rem;margin-bottom:1.5rem}
-.code-label{font-size:10px;letter-spacing:.2em;color:var(--muted);text-transform:uppercase;margin-bottom:4px}
-.code-val{font-family:'Cormorant Garamond',serif;font-size:2rem;letter-spacing:.2em;color:var(--gold)}
-.watermark{position:fixed;bottom:1.5rem;right:1.5rem;background:rgba(${accentRgb},.12);border:1px solid var(--border2);border-radius:10px;padding:.6rem 1rem;font-size:11px;color:var(--muted);letter-spacing:.05em}
+.btn-ghost:hover,.btn-ghost:active{border-color:var(--border2);color:var(--text)}
+.success-wrap{text-align:center;padding:2rem .5rem}
+.success-icon{width:68px;height:68px;border-radius:50%;border:1px solid var(--gold);display:flex;align-items:center;justify-content:center;margin:0 auto 1.25rem;font-size:26px;color:var(--gold)}
+.success-title{font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:300;color:var(--gold2);margin-bottom:.4rem}
+.success-sub{font-size:12px;color:var(--muted);line-height:1.7;margin-bottom:1.75rem}
+.code-box{background:var(--surface);border:1px solid var(--border2);border-radius:11px;padding:.9rem;margin-bottom:1.25rem}
+.code-lbl{font-size:10px;letter-spacing:.2em;color:var(--muted);text-transform:uppercase;margin-bottom:4px}
+.code-val{font-family:'Cormorant Garamond',serif;font-size:1.8rem;letter-spacing:.2em;color:var(--gold)}
 </style>
 </head>
 <body>
@@ -965,33 +1099,33 @@ ${cardCSS}
   <div class="step"><div class="step-dot active" id="dot1">1</div><div class="step-label active" id="lbl1">Serviço</div></div>
   <div class="step-connector"></div>
   <div class="step"><div class="step-dot" id="dot2">2</div><div class="step-label" id="lbl2">Profissional</div></div>
-  <div class="step"><div class="step-dot" id="dot3">3</div><div class="step-label" id="lbl3">Data & Hora</div></div>
+  <div class="step"><div class="step-dot" id="dot3">3</div><div class="step-label" id="lbl3">Data</div></div>
   <div class="step"><div class="step-dot" id="dot4">4</div><div class="step-label" id="lbl4">Confirmar</div></div>
 </div>
 <div class="container">
   <div class="panel active" id="step1">
     <div class="section-title">${cfg.t1}</div>
-    <div class="section-sub">Escolha o que você deseja agendar</div>
+    <div class="section-sub">Escolha o que deseja agendar</div>
     <div class="service-grid">${svcHTML}</div>
     <button class="btn btn-primary" id="btn1" disabled onclick="goStep(2)">Continuar</button>
   </div>
   <div class="panel" id="step2">
     <div class="section-title">${cfg.t2}</div>
-    <div class="section-sub">Escolha com quem prefere ser atendido(a)</div>
+    <div class="section-sub">Com quem prefere ser atendido(a)?</div>
     <div class="prof-list">${profHTML}</div>
     <button class="btn btn-primary" id="btn2" disabled onclick="goStep(3)">Continuar</button>
     <button class="btn btn-ghost" onclick="goStep(1)">Voltar</button>
   </div>
   <div class="panel" id="step3">
     <div class="section-title">Quando?</div>
-    <div class="section-sub">Escolha a data e horário preferido</div>
+    <div class="section-sub">Escolha a data e horário</div>
     <div class="cal-header">
       <button class="cal-nav" onclick="changeMonth(-1)">‹</button>
       <div class="cal-month" id="cal-month"></div>
       <button class="cal-nav" onclick="changeMonth(1)">›</button>
     </div>
     <div class="cal-grid" id="cal-grid"></div>
-    <div style="font-size:11px;letter-spacing:.1em;color:var(--muted);text-transform:uppercase;margin-bottom:.75rem" id="time-title"></div>
+    <div style="font-size:10px;letter-spacing:.1em;color:var(--muted);text-transform:uppercase;margin-bottom:.65rem" id="time-title"></div>
     <div class="time-grid" id="time-grid"></div>
     <button class="btn btn-primary" id="btn3" disabled onclick="goStep(4)">Continuar</button>
     <button class="btn btn-ghost" onclick="goStep(2)">Voltar</button>
@@ -1000,8 +1134,8 @@ ${cardCSS}
     <div class="section-title">Confirmar</div>
     <div class="section-sub">Revise e informe seus dados</div>
     <div class="summary">
-      <div class="summary-header"><p>Resumo do agendamento</p></div>
-      <div class="summary-body">
+      <div class="sum-header"><p>Resumo do agendamento</p></div>
+      <div class="sum-body">
         <div class="sum-row"><span class="sum-label">Serviço</span><span class="sum-val" id="s-service">—</span></div>
         <div class="sum-row"><span class="sum-label">Profissional</span><span class="sum-val" id="s-prof">—</span></div>
         <div class="sum-row"><span class="sum-label">Data</span><span class="sum-val" id="s-date">—</span></div>
@@ -1009,9 +1143,9 @@ ${cardCSS}
         <div class="sum-row sum-total"><span class="sum-label">Total</span><span class="sum-val" id="s-price">—</span></div>
       </div>
     </div>
-    <div class="field"><label>Nome completo</label><input type="text" id="fname" placeholder="Seu nome" oninput="validateForm()"></div>
-    <div class="field"><label>WhatsApp</label><input type="tel" id="fphone" placeholder="(99) 99999-9999" oninput="validateForm()"></div>
-    <div class="field"><label>E-mail (opcional)</label><input type="email" id="femail" placeholder="seu@email.com"></div>
+    <div class="field"><label>Nome completo</label><input type="text" id="fname" placeholder="Seu nome" oninput="validateForm()" autocomplete="name"></div>
+    <div class="field"><label>WhatsApp</label><input type="tel" id="fphone" placeholder="(99) 99999-9999" oninput="validateForm()" autocomplete="tel"></div>
+    <div class="field"><label>E-mail (opcional)</label><input type="email" id="femail" placeholder="seu@email.com" autocomplete="email"></div>
     <button class="btn btn-primary" id="btn4" disabled onclick="confirmBooking()">Confirmar agendamento</button>
     <button class="btn btn-ghost" onclick="goStep(3)">Voltar</button>
   </div>
@@ -1020,11 +1154,8 @@ ${cardCSS}
       <div class="success-icon">✓</div>
       <div class="success-title">Agendado!</div>
       <div class="success-sub">${cfg.succ}</div>
-      <div class="confirm-code">
-        <div class="code-label">Código de confirmação</div>
-        <div class="code-val" id="conf-code">#AG0000</div>
-      </div>
-      <div class="summary"><div class="summary-body">
+      <div class="code-box"><div class="code-lbl">Código de confirmação</div><div class="code-val" id="conf-code">#AG0000</div></div>
+      <div class="summary"><div class="sum-body">
         <div class="sum-row"><span class="sum-label">Serviço</span><span class="sum-val" id="c-service">—</span></div>
         <div class="sum-row"><span class="sum-label">Profissional</span><span class="sum-val" id="c-prof">—</span></div>
         <div class="sum-row"><span class="sum-label">Data e hora</span><span class="sum-val" id="c-dt">—</span></div>
@@ -1034,82 +1165,76 @@ ${cardCSS}
     </div>
   </div>
 </div>
-<div class="watermark">${cfg.footer}</div>
 <script>
-var booking={service:'',prof:'',date:'',time:'',price:''};
+var bk={service:'',prof:'',date:'',time:'',price:''};
 var calDate=new Date();calDate.setDate(1);
-var selectedDay=null;
 var slots=${JSON.stringify(slots)};
-var blockedDays=${JSON.stringify(blockedDays)};
+var blocked=${JSON.stringify(blocked)};
 var busy=[1,4,7];
 function goStep(n){
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
   document.getElementById('step'+n).classList.add('active');
   for(var i=1;i<=4;i++){
-    var dot=document.getElementById('dot'+i),lbl=document.getElementById('lbl'+i);
-    dot.className='step-dot'+(i===n?' active':i<n?' done':'');
-    lbl.className='step-label'+(i===n?' active':'');
+    var d=document.getElementById('dot'+i),l=document.getElementById('lbl'+i);
+    d.className='step-dot'+(i===n?' active':i<n?' done':'');
+    l.className='step-label'+(i===n?' active':'');
   }
   window.scrollTo({top:0,behavior:'smooth'});
   if(n===4){
-    document.getElementById('s-service').textContent=booking.service;
-    document.getElementById('s-prof').textContent=booking.prof;
-    document.getElementById('s-date').textContent=booking.date;
-    document.getElementById('s-time').textContent=booking.time;
-    document.getElementById('s-price').textContent=booking.price;
+    document.getElementById('s-service').textContent=bk.service;
+    document.getElementById('s-prof').textContent=bk.prof;
+    document.getElementById('s-date').textContent=bk.date;
+    document.getElementById('s-time').textContent=bk.time;
+    document.getElementById('s-price').textContent=bk.price;
   }
 }
 function selectService(el,name,dur,price){
   document.querySelectorAll('.service-card').forEach(c=>c.classList.remove('selected'));
-  el.classList.add('selected');
-  booking.service=name;booking.price=price;
+  el.classList.add('selected');bk.service=name;bk.price=price;
   document.getElementById('btn1').disabled=false;
 }
 function selectProf(el,name){
   document.querySelectorAll('.prof-card').forEach(c=>c.classList.remove('selected'));
-  el.classList.add('selected');
-  booking.prof=name;
-  document.getElementById('btn2').disabled=false;
+  el.classList.add('selected');bk.prof=name;document.getElementById('btn2').disabled=false;
 }
 var months=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 var days=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
 function renderCal(){
   var m=calDate.getMonth(),y=calDate.getFullYear();
   document.getElementById('cal-month').textContent=months[m]+' '+y;
-  var grid=document.getElementById('cal-grid');
-  grid.innerHTML='';
-  days.forEach(d=>{var el=document.createElement('div');el.className='cal-day-name';el.textContent=d;grid.appendChild(el);});
+  var g=document.getElementById('cal-grid');g.innerHTML='';
+  days.forEach(d=>{var e=document.createElement('div');e.className='cal-day-name';e.textContent=d;g.appendChild(e);});
   var first=new Date(y,m,1).getDay(),total=new Date(y,m+1,0).getDate(),today=new Date();
-  for(var i=0;i<first;i++){var el=document.createElement('div');el.className='cal-day empty';grid.appendChild(el);}
+  for(var i=0;i<first;i++){var e=document.createElement('div');e.className='cal-day empty';g.appendChild(e);}
   for(var d=1;d<=total;d++){
-    var el=document.createElement('div'),dt=new Date(y,m,d);
+    var e=document.createElement('div'),dt=new Date(y,m,d);
     var isPast=dt<new Date(today.getFullYear(),today.getMonth(),today.getDate());
-    var isBlocked=blockedDays.includes(dt.getDay());
-    if(isPast||isBlocked){el.className='cal-day past';el.textContent=d;}
+    var isBlocked=blocked.includes(dt.getDay());
+    if(isPast||isBlocked){e.className='cal-day past';e.textContent=d;}
     else{
-      el.className='cal-day avail';
-      if(d===today.getDate()&&m===today.getMonth()&&y===today.getFullYear())el.classList.add('today');
-      el.textContent=d;
-      (function(day,elem){elem.onclick=function(){
+      e.className='cal-day avail';
+      if(d===today.getDate()&&m===today.getMonth()&&y===today.getFullYear())e.classList.add('today');
+      e.textContent=d;
+      (function(day,el){el.onclick=function(){
         document.querySelectorAll('.cal-day').forEach(c=>c.classList.remove('selected'));
-        elem.classList.add('selected');selectedDay=day;
+        el.classList.add('selected');
         var mo=('0'+(m+1)).slice(-2),da=('0'+day).slice(-2);
-        booking.date=da+'/'+mo+'/'+y;renderTimes();
-      };})(d,el);
+        bk.date=da+'/'+mo+'/'+y;renderTimes();
+      };})(d,e);
     }
-    grid.appendChild(el);
+    g.appendChild(e);
   }
 }
-function changeMonth(dir){calDate.setMonth(calDate.getMonth()+dir);selectedDay=null;booking.date='';booking.time='';document.getElementById('btn3').disabled=true;renderCal();document.getElementById('time-grid').innerHTML='';}
+function changeMonth(dir){calDate.setMonth(calDate.getMonth()+dir);bk.date='';bk.time='';document.getElementById('btn3').disabled=true;renderCal();document.getElementById('time-grid').innerHTML='';}
 function renderTimes(){
   var tg=document.getElementById('time-grid');tg.innerHTML='';
-  document.getElementById('time-title').textContent='Horários disponíveis — '+booking.date;
+  document.getElementById('time-title').textContent='Disponível em '+bk.date;
   slots.forEach(function(s,i){
-    var el=document.createElement('div');
-    el.className='time-slot'+(busy.includes(i)?' busy':'');
-    el.textContent=s;
-    if(!busy.includes(i)){el.onclick=function(){document.querySelectorAll('.time-slot').forEach(t=>t.classList.remove('selected'));el.classList.add('selected');booking.time=s;document.getElementById('btn3').disabled=false;};}
-    tg.appendChild(el);
+    var e=document.createElement('div');
+    e.className='time-slot'+(busy.includes(i)?' busy':'');
+    e.textContent=s;
+    if(!busy.includes(i)){e.onclick=function(){document.querySelectorAll('.time-slot').forEach(t=>t.classList.remove('selected'));e.classList.add('selected');bk.time=s;document.getElementById('btn3').disabled=false;};}
+    tg.appendChild(e);
   });
 }
 function validateForm(){
@@ -1119,20 +1244,20 @@ function validateForm(){
 function confirmBooking(){
   var code='#AG'+Math.floor(1000+Math.random()*9000);
   document.getElementById('conf-code').textContent=code;
-  document.getElementById('c-service').textContent=booking.service;
-  document.getElementById('c-prof').textContent=booking.prof;
-  document.getElementById('c-dt').textContent=booking.date+' às '+booking.time;
-  document.getElementById('c-price').textContent=booking.price;
+  document.getElementById('c-service').textContent=bk.service;
+  document.getElementById('c-prof').textContent=bk.prof;
+  document.getElementById('c-dt').textContent=bk.date+' às '+bk.time;
+  document.getElementById('c-price').textContent=bk.price;
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
   document.getElementById('step5').classList.add('active');
   document.getElementById('steps').style.display='none';
   window.scrollTo({top:0,behavior:'smooth'});
 }
 function restart(){
-  booking={service:'',prof:'',date:'',time:'',price:''};
+  bk={service:'',prof:'',date:'',time:'',price:''};
   document.getElementById('steps').style.display='flex';
   document.querySelectorAll('.service-card,.prof-card,.cal-day,.time-slot').forEach(e=>e.classList.remove('selected'));
-  document.getElementById('btn1').disabled=true;document.getElementById('btn2').disabled=true;document.getElementById('btn3').disabled=true;
+  ['btn1','btn2','btn3'].forEach(function(id){document.getElementById(id).disabled=true;});
   document.getElementById('fname').value='';document.getElementById('fphone').value='';document.getElementById('femail').value='';
   goStep(1);renderCal();
 }
@@ -1142,43 +1267,31 @@ renderCal();
 </html>`;
 }
 
-/* =====================================================
-   PREVIEW
-===================================================== */
+/* ═══════════════════════════════════════════════════════
+   UPDATE PREVIEW
+═══════════════════════════════════════════════════════ */
 var _pt=null;
 function updatePreview(){
   clearTimeout(_pt);
   _pt=setTimeout(function(){
-    var html=buildHTML();
+    var html=buildAppHTML();
+    // desktop
     var frame=document.getElementById('preview');
+    if(frame){
+      var doc=frame.contentDocument||frame.contentWindow.document;
+      doc.open();doc.write(html);doc.close();
+      setTimeout(function(){try{var h=doc.body.scrollHeight;frame.style.height=Math.max(600,h+40)+'px';}catch(e){}},250);
+    }
+  },100);
+}
+function updateMobilePreview(){
+  var html=buildAppHTML();
+  var frame=document.getElementById('preview-mobile');
+  if(frame){
     var doc=frame.contentDocument||frame.contentWindow.document;
     doc.open();doc.write(html);doc.close();
-    setTimeout(function(){
-      try{var h=doc.body.scrollHeight;frame.style.height=Math.max(600,h+40)+'px';}catch(e){}
-    },250);
-  },90);
+  }
 }
-
-/* =====================================================
-   EXPORT
-===================================================== */
-function exportHTML(){
-  var html=buildHTML();
-  var blob=new Blob([html],{type:'text/html;charset=utf-8'});
-  var url=URL.createObjectURL(blob);
-  var a=document.createElement('a');a.href=url;a.download='agendamento.html';a.click();
-  URL.revokeObjectURL(url);
-  document.getElementById('exportModal').classList.add('show');
-}
-function closeModal(){document.getElementById('exportModal').classList.remove('show');}
-function resetAll(){if(confirm('Resetar todas as configurações?'))location.reload();}
-
-/* =====================================================
-   INIT
-===================================================== */
-renderServicesList();
-renderProfsList();
-updatePreview();
 </script>
 </body>
 </html>
