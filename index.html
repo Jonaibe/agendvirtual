@@ -951,9 +951,11 @@ function buildShareLink(){
   };
 
   var json = JSON.stringify(data);
-  var b64  = btoa(unescape(encodeURIComponent(json)));
+  // Codificar UTF-8 → Base64 corretamente
+  var b64 = btoa(encodeURIComponent(json).replace(/%([0-9A-F]{2})/g, function(m,p){return String.fromCharCode(parseInt(p,16))}));
+  // NÃO fazer encodeURIComponent do b64 para evitar %2B %2F %3D no link
   var base = location.href.replace(/\/[^\/]*(\?.*)?$/, '/');
-  return base + 'agendamento.html#d=' + encodeURIComponent(b64);
+  return base + 'agendamento.html#d=' + b64;
 }
 function openShareModal(){
   var link = buildShareLink();
