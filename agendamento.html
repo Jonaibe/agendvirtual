@@ -46,7 +46,7 @@ function getData(){
 
 // === HELPERS ===
 function h(v){return String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;')}
-function mk(tag,cls){var e=document.createElement(tag);if(cls)e.className=cls;return e}
+function mk(tag,cls,txt){var e=document.createElement(tag);if(cls)e.className=cls;if(txt!==undefined)e.textContent=txt;return e}
 
 // === ESTADO ===
 var D=getData();
@@ -319,6 +319,7 @@ function goTo(n){
     l.className='dlb'+(i===n?' on':'');
   }
   window.scrollTo({top:0,behavior:'smooth'});
+  if(n===3){ renderCal(); }
   if(n===4){
     document.getElementById('rs1').textContent=BK.svc;
     document.getElementById('rs2').textContent=BK.prof;
@@ -336,7 +337,7 @@ function renderCal(){
   var cm=document.getElementById('calmon'); if(cm) cm.textContent=MN[m]+' '+y;
   var cg=document.getElementById('cgrid'); if(!cg) return;
   cg.innerHTML='';
-  DN.forEach(function(d){var e=mk('div','cdn'); e.textContent=d; cg.appendChild(e);});
+  DN.forEach(function(d){cg.appendChild(mk('div','cdn',d));});
   var first=new Date(y,m,1).getDay(),total=new Date(y,m+1,0).getDate(),today=new Date();
   for(var i=0;i<first;i++){var e=mk('div','cd em'); e.textContent=' '; cg.appendChild(e);}
   for(var d=1;d<=total;d++){
