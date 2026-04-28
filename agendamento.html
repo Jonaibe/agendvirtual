@@ -7,7 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'DM Sans',sans-serif;background:#0e0c0b;color:#f0ebe4;min-height:100vh;overflow-x:hidden}
+body{font-family:'DM Sans',sans-serif;background:#0e0c0b;color:#f0ebe4;min-height:100vh}
 #loading{position:fixed;inset:0;background:#0e0c0b;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1rem;z-index:99}
 .spin{width:36px;height:36px;border-radius:50%;border:2px solid rgba(201,169,110,.2);border-top-color:#c9a96e;animation:sp .8s linear infinite}
 @keyframes sp{to{transform:rotate(360deg)}}
@@ -15,318 +15,281 @@ body{font-family:'DM Sans',sans-serif;background:#0e0c0b;color:#f0ebe4;min-heigh
 #errscreen{display:none;position:fixed;inset:0;background:#0a0a0a;flex-direction:column;align-items:center;justify-content:center;gap:1rem;padding:2rem;text-align:center}
 #errscreen h2{font-family:'Cormorant Garamond',serif;color:#c9a96e;font-size:1.5rem}
 #errscreen p{font-size:13px;color:#666;max-width:300px;line-height:1.6}
-#app{min-height:100vh}
 </style>
 </head>
 <body>
 <div id="loading"><div class="spin"></div><div class="lnm" id="lnm">Carregando...</div></div>
 <div id="errscreen"><div style="font-size:3rem">😕</div><h2>Link inválido</h2><p>Solicite um novo link ao estabelecimento.</p></div>
 <div id="app"></div>
-
 <script>
-// ─── utilitários ───────────────────────────────────────
-function hr(h){var n=parseInt(h.replace('#',''),16);return((n>>16)&255)+','+(((n>>8)&255))+','+(n&255)}
-function br(h,a){var n=parseInt(h.replace('#',''),16);return'#'+((1<<24)|(Math.min(255,((n>>16)&255)+a)<<16)|(Math.min(255,((n>>8)&255)+a)<<8)|Math.min(255,(n&255)+a)).toString(16).slice(1)}
-function lt(h,a){var n=parseInt(h.replace('#',''),16);return'#'+((1<<24)|(Math.min(255,(n>>16)+a)<<16)|(Math.min(255,((n>>8)&0xff)+a)<<8)|Math.min(255,(n&0xff)+a)).toString(16).slice(1)}
-function he(v){return String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
-function el(tag,cls,html){var e=document.createElement(tag);if(cls)e.className=cls;if(html!==undefined)e.innerHTML=html;return e}
+// === DECODE ===
+function getData(){
+  try{
+    var raw='', h=location.hash||'', q=location.search||'';
+    // tenta hash primeiro: #d=...
+    if(h.indexOf('d=')>=0) raw=h.slice(h.indexOf('d=')+2);
+    // tenta query: ?d=...
+    else if(q.indexOf('d=')>=0){
+      raw=q.slice(q.indexOf('d=')+2);
+      if(raw.indexOf('&')>=0) raw=raw.slice(0,raw.indexOf('&'));
+    }
+    if(!raw) return null;
+    // URL decode
+    try{ raw=decodeURIComponent(raw); }catch(e){}
+    // Base64 → UTF-8
+    var bin=atob(raw), arr=new Uint8Array(bin.length);
+    for(var i=0;i<bin.length;i++) arr[i]=bin.charCodeAt(i);
+    var json=new TextDecoder().decode(arr);
+    return JSON.parse(json);
+  }catch(e){ console.error('getData',e); return null; }
+}
 
-// ─── estado global ──────────────────────────────────────
-var D=null; // dados decodificados
+// === HELPERS ===
+function h(v){return String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;')}
+function mk(tag,cls){var e=document.createElement(tag);if(cls)e.className=cls;return e}
+
+// === ESTADO ===
+var D=getData();
 var BK={svc:'',prof:'',date:'',time:'',price:''};
 var CALDT=new Date(); CALDT.setDate(1);
 var SLOTS=[],BLOCKED=[],BUSY=[1,4,7];
+var _btn3=null;
 
-// ─── decode URL ─────────────────────────────────────────
-function decode(){
-  try{
-    // Pegar o dado bruto do hash ou query string
-    var raw = '';
-    var hash = location.hash;
-    if(hash && hash.indexOf('d=') >= 0){
-      raw = hash.slice(hash.indexOf('d=')+2);
-    } else {
-      var search = location.search;
-      if(search && search.indexOf('d=') >= 0){
-        raw = search.slice(search.indexOf('d=')+2);
-        // remover outros params se houver
-        if(raw.indexOf('&') >= 0) raw = raw.slice(0, raw.indexOf('&'));
-      }
-    }
-    if(!raw){ console.error('decode: sem dados na URL'); return false; }
-
-    // Decodificar URL encoding (%2B, %2F, %3D etc)
-    raw = raw.replace(/%2B/gi,'+').replace(/%2F/gi,'/').replace(/%3D/gi,'=');
-    try{ raw = decodeURIComponent(raw); }catch(e){}
-
-    // Decodificar Base64 → UTF-8
-    var bytes = atob(raw);
-    var json_str = '';
-    try{
-      // Método moderno UTF-8
-      var arr = new Uint8Array(bytes.length);
-      for(var i=0;i<bytes.length;i++) arr[i]=bytes.charCodeAt(i);
-      json_str = new TextDecoder('utf-8').decode(arr);
-    }catch(e){
-      // Fallback
-      try{ json_str = decodeURIComponent(escape(bytes)); }catch(e2){ json_str = bytes; }
-    }
-
-    D = JSON.parse(json_str);
-    console.log('decode OK, bizname:', D.cfg && D.cfg.bizname);
-    return true;
-  }catch(e){
-    console.error('decode ERRO:', e);
-    return false;
-  }
+if(!D){
+  document.getElementById('loading').style.display='none';
+  document.getElementById('errscreen').style.display='flex';
+}else{
+  init();
 }
 
-// ─── CSS dinâmico ────────────────────────────────────────
-function injectCSS(ac,bg,ar,cr,gc){
-  var sf=br(bg,8),sf2=br(bg,14),a2=lt(ac,30);
+function hexRgb(hex){
+  var n=parseInt(hex.replace('#',''),16);
+  return ((n>>16)&255)+','+(((n>>8)&255))+','+(n&255);
+}
+function brighter(hex,a){
+  var n=parseInt(hex.replace('#',''),16);
+  return '#'+((1<<24)|(Math.min(255,((n>>16)&255)+a)<<16)|(Math.min(255,((n>>8)&255)+a)<<8)|Math.min(255,(n&255)+a)).toString(16).slice(1);
+}
+function lighter(hex,a){
+  var n=parseInt(hex.replace('#',''),16);
+  return '#'+((1<<24)|(Math.min(255,(n>>16)+a)<<16)|(Math.min(255,((n>>8)&0xff)+a)<<8)|Math.min(255,(n&0xff)+a)).toString(16).slice(1);
+}
+
+function init(){
+  var cfg=D.cfg||{}, svcs=D.services||[], profs=D.profs||[];
+  SLOTS=D.slots||cfg.slots||['08:00','09:00','10:00','11:00','13:00','14:00','15:00','16:00'];
+  BLOCKED=D.blocked||cfg.blocked||[0];
+
+  var ac=cfg.accent||'#c9a96e';
+  var a2=cfg.accent2||lighter(ac,30);
+  var bg=cfg.bg||'#0e0c0b';
+  var ar=hexRgb(ac);
+  var sf=brighter(bg,8), sf2=brighter(bg,14);
+  var cr=(D.cardRadius!==undefined?D.cardRadius:14)+'px';
+  var gc=D.gridCols||2;
   var gcss=gc===1?'1fr':gc===3?'1fr 1fr 1fr':'1fr 1fr';
+  var px={sm:'18px',md:'26px',lg:'34px',xl:'44px'}[D.iconSize||'md']||'26px';
+
+  document.title=cfg.bizname||'Agendamento';
+
+  // CSS
   var st=document.createElement('style');
   st.textContent=
     'body{background:'+bg+';color:#f0ebe4}'
-   +':root{--ac:'+ac+';--a2:'+a2+';--bg:'+bg+';--sf:'+sf+';--sf2:'+sf2+';--ar:'+ar+';--cr:'+cr+'px}'
-   +'body::before{content:"";position:fixed;top:-200px;right:-200px;width:500px;height:500px;'
-   +'background:radial-gradient(circle,rgba('+ar+',.06) 0%,transparent 70%);pointer-events:none;z-index:0}'
-   // header
    +'header{text-align:center;padding:2.5rem 1.25rem 1.5rem}'
    +'.hl{display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:.4rem}'
-   +'.hl::before,.hl::after{content:"";flex:1;max-width:60px;height:1px}'
-   +'.hl::before{background:linear-gradient(90deg,transparent,var(--ac))}'
-   +'.hl::after{background:linear-gradient(90deg,var(--ac),transparent)}'
-   +'.hn{font-family:"Cormorant Garamond",serif;font-size:clamp(1.5rem,5vw,2rem);font-weight:300;letter-spacing:.12em;color:var(--a2)}'
+   +'.hl:before{content:"";flex:1;max-width:60px;height:1px;background:linear-gradient(90deg,transparent,'+ac+')}'
+   +'.hl:after{content:"";flex:1;max-width:60px;height:1px;background:linear-gradient(90deg,'+ac+',transparent)}'
+   +'.hn{font-family:"Cormorant Garamond",serif;font-size:clamp(1.5rem,5vw,2rem);font-weight:300;letter-spacing:.12em;color:'+a2+'}'
    +'.ht{font-size:10px;letter-spacing:.3em;color:#8a7e72;text-transform:uppercase;margin-top:2px}'
-   // steps
    +'.steps{display:flex;justify-content:center;margin:0 auto 2rem;max-width:400px;padding:0 1.25rem;position:relative}'
    +'.sconn{position:absolute;top:13px;left:50%;transform:translateX(-50%);width:58%;height:1px;background:rgba('+ar+',.35);z-index:0}'
    +'.step{display:flex;flex-direction:column;align-items:center;gap:5px;flex:1;z-index:1}'
-   +'.sdot{width:26px;height:26px;border-radius:50%;border:1px solid rgba('+ar+',.35);display:flex;align-items:center;justify-content:center;font-size:10px;color:#8a7e72;background:'+bg+';transition:.4s}'
-   +'.sdot.on{border-color:var(--ac);color:var(--ac);background:rgba('+ar+',.08)}'
-   +'.sdot.dn{border-color:var(--ac);background:var(--ac);color:'+bg+'}'
-   +'.slb{font-size:9px;letter-spacing:.08em;color:#8a7e72;text-transform:uppercase;text-align:center}'
-   +'.slb.on{color:var(--ac)}'
-   // container / panels
+   +'.dot{width:26px;height:26px;border-radius:50%;border:1px solid rgba('+ar+',.35);display:flex;align-items:center;justify-content:center;font-size:10px;color:#8a7e72;background:'+bg+';transition:.4s}'
+   +'.dot.on{border-color:'+ac+';color:'+ac+';background:rgba('+ar+',.08)}'
+   +'.dot.dn{border-color:'+ac+';background:'+ac+';color:'+bg+'}'
+   +'.dlb{font-size:9px;letter-spacing:.08em;color:#8a7e72;text-transform:uppercase;text-align:center}'
+   +'.dlb.on{color:'+ac+'}'
    +'.wrap{max-width:440px;margin:0 auto;padding:0 1.25rem 5rem}'
    +'.pnl{display:none;animation:fi .3s ease}.pnl.on{display:block}'
    +'@keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}'
-   +'.ptit{font-family:"Cormorant Garamond",serif;font-size:1.4rem;font-weight:300;font-style:italic;color:var(--a2);margin-bottom:.25rem}'
+   +'.ptit{font-family:"Cormorant Garamond",serif;font-size:1.4rem;font-weight:300;font-style:italic;color:'+a2+';margin-bottom:.25rem}'
    +'.psub{font-size:11px;color:#8a7e72;margin-bottom:1.25rem}'
-   // service cards
    +'.sgrid{display:grid;grid-template-columns:'+gcss+';gap:10px;margin-bottom:1.5rem}'
-   +'.card{border-radius:var(--cr);cursor:pointer;transition:.25s;position:relative;overflow:hidden;-webkit-tap-highlight-color:transparent;background:var(--sf);border:1px solid rgba('+ar+',.18);padding:1rem}'
+   +'.card{border-radius:'+cr+';cursor:pointer;transition:.25s;background:'+sf+';border:1px solid rgba('+ar+',.18);padding:1rem;-webkit-tap-highlight-color:transparent}'
    +'.card:active{transform:scale(.97)}'
-   +'.card.on{border-color:var(--ac);background:rgba('+ar+',.09)}'
-   +'.cico{margin-bottom:.45rem}'
-   +'.cnm{font-size:13px;font-weight:400;color:#f0ebe4;margin-bottom:2px}'
+   +'.card.on{border-color:'+ac+';background:rgba('+ar+',.09)}'
+   +'.cico{margin-bottom:.4rem}'
+   +'.cnm{font-size:13px;color:#f0ebe4;margin-bottom:2px}'
    +'.cdr{font-size:11px;color:#8a7e72}'
-   +'.cpr{font-size:14px;color:var(--ac);font-weight:500;margin-top:5px}'
-   // prof cards
+   +'.cpr{font-size:14px;color:'+ac+';font-weight:500;margin-top:5px}'
    +'.plist{display:flex;flex-direction:column;gap:9px;margin-bottom:1.5rem}'
-   +'.pcard{border:1px solid rgba('+ar+',.18);border-radius:var(--cr);padding:.9rem 1rem;cursor:pointer;transition:.25s;background:var(--sf);display:flex;align-items:center;gap:12px;-webkit-tap-highlight-color:transparent}'
-   +'.pcard:active{transform:scale(.98)}.pcard.on{border-color:var(--ac);background:rgba('+ar+',.08)}'
+   +'.pcard{border:1px solid rgba('+ar+',.18);border-radius:'+cr+';padding:.9rem 1rem;cursor:pointer;transition:.25s;background:'+sf+';display:flex;align-items:center;gap:12px;-webkit-tap-highlight-color:transparent}'
+   +'.pcard:active{transform:scale(.98)}.pcard.on{border-color:'+ac+';background:rgba('+ar+',.08)}'
    +'.pav{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:"Cormorant Garamond",serif;font-size:16px;flex-shrink:0}'
-   +'.pnm{font-size:14px;color:#f0ebe4}.psp{font-size:11px;color:#8a7e72;margin-top:1px}.prt{font-size:11px;color:var(--ac);margin-top:2px}'
-   // calendar
+   +'.pnm{font-size:14px;color:#f0ebe4}.psp{font-size:11px;color:#8a7e72;margin-top:1px}.prt{font-size:11px;color:'+ac+';margin-top:2px}'
    +'.calh{display:flex;align-items:center;justify-content:space-between;margin-bottom:.9rem}'
-   +'.calm{font-family:"Cormorant Garamond",serif;font-size:1.15rem;font-weight:300;color:var(--a2)}'
-   +'.caln{width:32px;height:32px;border:1px solid rgba('+ar+',.35);border-radius:8px;background:none;color:var(--ac);cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent}'
+   +'.calm{font-family:"Cormorant Garamond",serif;font-size:1.15rem;color:'+a2+'}'
+   +'.caln{width:32px;height:32px;border:1px solid rgba('+ar+',.35);border-radius:8px;background:none;color:'+ac+';cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent}'
    +'.cg{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:1.25rem}'
    +'.cdn{text-align:center;font-size:9px;color:#8a7e72;padding:4px 0;text-transform:uppercase}'
    +'.cd{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:7px;font-size:13px;border:1px solid transparent;color:#8a7e72;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent;transition:.15s}'
-   +'.cd.av{color:#f0ebe4}.cd.av:active{background:var(--sf2);border-color:rgba('+ar+',.35)}'
-   +'.cd.on{background:var(--ac);color:'+bg+';font-weight:500}.cd.td{border-color:rgba('+ar+',.35);color:var(--ac)}'
+   +'.cd.av{color:#f0ebe4}.cd.av:active{background:'+sf2+';border-color:rgba('+ar+',.35)}'
+   +'.cd.on{background:'+ac+';color:'+bg+';font-weight:500}'
+   +'.cd.td{border-color:rgba('+ar+',.35);color:'+ac+'}'
    +'.cd.em,.cd.pa{opacity:0;pointer-events:none}'
-   // time slots
    +'.tg{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:1.5rem}'
-   +'.ts{border:1px solid rgba('+ar+',.18);border-radius:9px;padding:.65rem;text-align:center;font-size:13px;cursor:pointer;color:#f0ebe4;background:var(--sf);transition:.15s;-webkit-tap-highlight-color:transparent}'
-   +'.ts:active{border-color:rgba('+ar+',.5)}.ts.on{border-color:var(--ac);color:var(--ac);background:rgba('+ar+',.08)}'
+   +'.ts{border:1px solid rgba('+ar+',.18);border-radius:9px;padding:.65rem;text-align:center;font-size:13px;cursor:pointer;color:#f0ebe4;background:'+sf+';transition:.15s;-webkit-tap-highlight-color:transparent}'
+   +'.ts:active{border-color:rgba('+ar+',.5)}.ts.on{border-color:'+ac+';color:'+ac+';background:rgba('+ar+',.08)}'
    +'.ts.bz{opacity:.35;pointer-events:none;text-decoration:line-through}'
    +'.tit{font-size:10px;letter-spacing:.1em;color:#8a7e72;text-transform:uppercase;margin-bottom:.65rem}'
-   // summary
-   +'.sum{border:1px solid rgba('+ar+',.18);border-radius:var(--cr);background:var(--sf);overflow:hidden;margin-bottom:1.5rem}'
+   +'.sum{border:1px solid rgba('+ar+',.18);border-radius:'+cr+';background:'+sf+';overflow:hidden;margin-bottom:1.5rem}'
    +'.sumh{background:rgba('+ar+',.08);padding:.9rem 1.1rem;border-bottom:1px solid rgba('+ar+',.18)}'
-   +'.sumh p{font-family:"Cormorant Garamond",serif;font-size:1rem;color:var(--a2)}'
+   +'.sumh p{font-family:"Cormorant Garamond",serif;font-size:1rem;color:'+a2+'}'
    +'.sumb{padding:1.1rem}'
    +'.sr{display:flex;justify-content:space-between;padding:.45rem 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:12px}'
    +'.sr:last-child{border-bottom:none;padding-top:.65rem}'
    +'.sk{color:#8a7e72}.sv{color:#f0ebe4}'
-   +'.stot .sk{color:#f0ebe4;font-weight:500}.stot .sv{color:var(--ac);font-size:15px;font-weight:500}'
-   // form
+   +'.stot .sk{color:#f0ebe4;font-weight:500}.stot .sv{color:'+ac+';font-size:15px;font-weight:500}'
    +'.fi{margin-bottom:.9rem}'
    +'.fi label{display:block;font-size:10px;letter-spacing:.1em;color:#8a7e72;text-transform:uppercase;margin-bottom:.35rem}'
-   +'.fi input{width:100%;background:var(--sf);border:1px solid rgba('+ar+',.18);border-radius:9px;padding:.72rem .9rem;color:#f0ebe4;font-family:"DM Sans",sans-serif;font-size:14px;outline:none;-webkit-appearance:none;transition:.2s}'
-   +'.fi input:focus{border-color:var(--a2)}'
+   +'.fi input{width:100%;background:'+sf+';border:1px solid rgba('+ar+',.18);border-radius:9px;padding:.72rem .9rem;color:#f0ebe4;font-family:"DM Sans",sans-serif;font-size:14px;outline:none;-webkit-appearance:none}'
    +'.fi input::placeholder{color:#555}'
-   // buttons
-   +'.btn{width:100%;padding:.82rem;border-radius:11px;font-family:"DM Sans",sans-serif;font-size:14px;letter-spacing:.07em;cursor:pointer;transition:.2s;margin-bottom:.65rem;border:none;display:block;-webkit-tap-highlight-color:transparent}'
+   +'.fi input:focus{border-color:'+a2+'}'
+   +'.btn{width:100%;padding:.82rem;border-radius:11px;font-family:"DM Sans",sans-serif;font-size:14px;letter-spacing:.07em;cursor:pointer;margin-bottom:.65rem;border:none;display:block;-webkit-tap-highlight-color:transparent;transition:.2s}'
    +'.btn:active{transform:scale(.98)}'
-   +'.bpri{background:var(--ac);color:'+bg+'}.bpri:disabled{opacity:.4;cursor:not-allowed;transform:none}'
-   +'.bsec{background:none;border:1px solid rgba('+ar+',.25)!important;color:#8a7e72}'
-   // success
+   +'.bp{background:'+ac+';color:'+bg+'}.bp:disabled{opacity:.4;cursor:not-allowed;transform:none}'
+   +'.bs{background:none;border:1px solid rgba('+ar+',.25)!important;color:#8a7e72}'
    +'.sw{text-align:center;padding:2.5rem .5rem}'
-   +'.sico{width:72px;height:72px;border-radius:50%;border:1px solid var(--ac);display:flex;align-items:center;justify-content:center;margin:0 auto 1.5rem;font-size:28px;color:var(--ac)}'
-   +'.sttl{font-family:"Cormorant Garamond",serif;font-size:2rem;font-weight:300;color:var(--a2);margin-bottom:.5rem}'
+   +'.sico{width:72px;height:72px;border-radius:50%;border:1px solid '+ac+';display:flex;align-items:center;justify-content:center;margin:0 auto 1.5rem;font-size:28px;color:'+ac+'}'
+   +'.sttl{font-family:"Cormorant Garamond",serif;font-size:2rem;font-weight:300;color:'+a2+';margin-bottom:.5rem}'
    +'.ssub{font-size:12px;color:#8a7e72;line-height:1.7;margin-bottom:2rem}'
-   +'.cbox{background:var(--sf);border:1px solid rgba('+ar+',.35);border-radius:11px;padding:1rem;margin-bottom:1.5rem}'
+   +'.cbox{background:'+sf+';border:1px solid rgba('+ar+',.35);border-radius:11px;padding:1rem;margin-bottom:1.5rem}'
    +'.clbl{font-size:10px;letter-spacing:.2em;color:#8a7e72;text-transform:uppercase;margin-bottom:4px}'
-   +'.cval{font-family:"Cormorant Garamond",serif;font-size:2rem;letter-spacing:.2em;color:var(--ac)}';
+   +'.cval{font-family:"Cormorant Garamond",serif;font-size:2rem;letter-spacing:.2em;color:'+ac+'}';
   document.head.appendChild(st);
-}
-
-// ─── renderizar app ──────────────────────────────────────
-function boot(){
-  var cfg=D.cfg||{}, svcs=D.services||[], profs=D.profs||[];
-  var cs=D.cardStyle||'classic', gc=D.gridCols||2, isz=D.iconSize||'md', cr=D.cardRadius!==undefined?D.cardRadius:14;
-  SLOTS  =D.slots||['08:00','09:00','10:00','11:00','13:00','14:00','15:00','16:00'];
-  BLOCKED=D.blocked||[0];
-
-  var ac=cfg.accent||'#c9a96e', bg=cfg.bg||'#0e0c0b', ar=hr(ac);
-  injectCSS(ac,bg,ar,cr,gc);
-
-  var px={sm:'18px',md:'26px',lg:'34px',xl:'44px'}[isz]||'26px';
-  var showDur=cfg.showDur!==false, showPrice=cfg.showPrice!==false;
-  var app=document.getElementById('app');
 
   // HEADER
+  var app=document.getElementById('app');
   var hdr=document.createElement('header');
-  hdr.innerHTML='<div class="hl"><span class="hn">'+he(cfg.bizname||'Agendamento')+'</span></div>'
-               +'<div class="ht">'+he(cfg.tagline||'')+'</div>';
+  hdr.innerHTML='<div class="hl"><span class="hn">'+h(cfg.bizname||'Agendamento')+'</span></div>'
+               +'<div class="ht">'+h(cfg.tagline||'')+'</div>';
   app.appendChild(hdr);
 
-  // STEPS BAR
-  var stepsBar=el('div','steps');
-  stepsBar.id='steps';
-  stepsBar.innerHTML='<div class="step"><div class="sdot on" id="d1">1</div><div class="slb on" id="l1">Serviço</div></div>'
+  // STEPS
+  var stEl=mk('div','steps'); stEl.id='steps';
+  stEl.innerHTML='<div class="step"><div class="dot on" id="d1">1</div><div class="dlb on" id="l1">Serviço</div></div>'
     +'<div class="sconn"></div>'
-    +'<div class="step"><div class="sdot" id="d2">2</div><div class="slb" id="l2">Profissional</div></div>'
-    +'<div class="step"><div class="sdot" id="d3">3</div><div class="slb" id="l3">Data</div></div>'
-    +'<div class="step"><div class="sdot" id="d4">4</div><div class="slb" id="l4">Confirmar</div></div>';
-  app.appendChild(stepsBar);
+    +'<div class="step"><div class="dot" id="d2">2</div><div class="dlb" id="l2">Profissional</div></div>'
+    +'<div class="step"><div class="dot" id="d3">3</div><div class="dlb" id="l3">Data</div></div>'
+    +'<div class="step"><div class="dot" id="d4">4</div><div class="dlb" id="l4">Confirmar</div></div>';
+  app.appendChild(stEl);
 
-  var wrap=el('div','wrap');
+  var wrap=mk('div','wrap');
 
-  // ── PASSO 1: Serviços ────────────────────────────────
-  var p1=el('div','pnl on'); p1.id='p1';
-  p1.appendChild(el('div','ptit',he(cfg.t1||'Qual serviço?')));
-  p1.appendChild(el('div','psub','Escolha o que deseja agendar'));
-  var sgrid=el('div','sgrid');
-  var btn1=el('button','btn bpri','Continuar'); btn1.disabled=true;
-
+  // PASSO 1
+  var p1=mk('div','pnl on'); p1.id='p1';
+  p1.appendChild(mk('div','ptit')).textContent=cfg.t1||'Qual serviço?';
+  p1.appendChild(mk('div','psub')).textContent='Escolha o que deseja agendar';
+  var sg=mk('div','sgrid');
+  var btn1=mk('button','btn bp'); btn1.textContent='Continuar'; btn1.disabled=true;
+  btn1.addEventListener('click',function(){goTo(2)});
   svcs.forEach(function(s){
-    var c=el('div','card');
+    var c=mk('div','card');
     c.innerHTML='<div class="cico" style="font-size:'+px+'">'+s.icon+'</div>'
-               +'<div class="cnm">'+he(s.name)+'</div>'
-               +(showDur?'<div class="cdr">'+he(s.dur)+'</div>':'')
-               +(showPrice?'<div class="cpr">'+he(s.price)+'</div>':'');
+               +'<div class="cnm">'+h(s.name)+'</div>'
+               +'<div class="cdr">'+h(s.dur)+'</div>'
+               +'<div class="cpr">'+h(s.price)+'</div>';
     c.addEventListener('click',function(){
       document.querySelectorAll('.card').forEach(function(x){x.classList.remove('on')});
       c.classList.add('on');
-      BK.svc=s.name; BK.price=s.price;
-      btn1.disabled=false;
+      BK.svc=s.name; BK.price=s.price; btn1.disabled=false;
     });
-    sgrid.appendChild(c);
+    sg.appendChild(c);
   });
-
-  btn1.addEventListener('click',function(){ goTo(2) });
-  p1.appendChild(sgrid);
-  p1.appendChild(btn1);
+  p1.appendChild(sg); p1.appendChild(btn1);
   wrap.appendChild(p1);
 
-  // ── PASSO 2: Profissionais ───────────────────────────
-  var p2=el('div','pnl'); p2.id='p2';
-  p2.appendChild(el('div','ptit',he(cfg.t2||'Profissional')));
-  p2.appendChild(el('div','psub','Com quem prefere ser atendido(a)?'));
-  var plist=el('div','plist');
-  var btn2=el('button','btn bpri','Continuar'); btn2.disabled=true;
-  var back2=el('button','btn bsec','Voltar');
-
-  var pcs=['#c9a96e','#a97abc','#7aacbc','#7abc97','#bc7a7a'];
-  var allP=profs.concat([{name:'Qualquer disponível',spec:'Primeiro horário livre',rating:''}]);
-  allP.forEach(function(p,i){
-    var col=pcs[i%pcs.length];
+  // PASSO 2
+  var p2=mk('div','pnl'); p2.id='p2';
+  p2.appendChild(mk('div','ptit')).textContent=cfg.t2||'Profissional';
+  p2.appendChild(mk('div','psub')).textContent='Com quem prefere ser atendido(a)?';
+  var pl=mk('div','plist');
+  var btn2=mk('button','btn bp'); btn2.textContent='Continuar'; btn2.disabled=true;
+  var bk2=mk('button','btn bs'); bk2.textContent='Voltar';
+  btn2.addEventListener('click',function(){goTo(3)});
+  bk2.addEventListener('click',function(){goTo(1)});
+  var cols=['#c9a96e','#a97abc','#7aacbc','#7abc97','#bc7a7a'];
+  profs.concat([{name:'Qualquer disponível',spec:'Primeiro horário livre',rating:''}]).forEach(function(p,i){
+    var col=cols[i%cols.length];
     var ini=p.name.split(' ').map(function(w){return w[0]||''}).slice(0,2).join('');
-    var pc=el('div','pcard');
-    pc.innerHTML='<div class="pav" style="background:'+col+'22;color:'+col+'">'+he(ini)+'</div>'
-                +'<div><div class="pnm">'+he(p.name)+'</div><div class="psp">'+he(p.spec)+'</div>'
-                +(p.rating?'<div class="prt">⭐ '+he(p.rating)+'</div>':'')+'</div>';
+    var pc=mk('div','pcard');
+    pc.innerHTML='<div class="pav" style="background:'+col+'22;color:'+col+'">'+h(ini)+'</div>'
+      +'<div><div class="pnm">'+h(p.name)+'</div><div class="psp">'+h(p.spec)+'</div>'
+      +(p.rating?'<div class="prt">⭐ '+h(p.rating)+'</div>':'')+'</div>';
     pc.addEventListener('click',function(){
       document.querySelectorAll('.pcard').forEach(function(x){x.classList.remove('on')});
-      pc.classList.add('on');
-      BK.prof=p.name; btn2.disabled=false;
+      pc.classList.add('on'); BK.prof=p.name; btn2.disabled=false;
     });
-    plist.appendChild(pc);
+    pl.appendChild(pc);
   });
-
-  btn2.addEventListener('click',function(){ goTo(3) });
-  back2.addEventListener('click',function(){ goTo(1) });
-  p2.appendChild(plist); p2.appendChild(btn2); p2.appendChild(back2);
+  p2.appendChild(pl); p2.appendChild(btn2); p2.appendChild(bk2);
   wrap.appendChild(p2);
 
-  // ── PASSO 3: Data e Hora ─────────────────────────────
-  var p3=el('div','pnl'); p3.id='p3';
-  p3.appendChild(el('div','ptit','Quando?'));
-  p3.appendChild(el('div','psub','Escolha a data e horário'));
-
-  var calh=el('div','calh');
-  var btnPrev=el('button','caln','‹'); btnPrev.addEventListener('click',function(){chMonth(-1)});
-  var calMon=el('div','calm'); calMon.id='calmon';
-  var btnNext=el('button','caln','›'); btnNext.addEventListener('click',function(){chMonth(1)});
-  calh.appendChild(btnPrev); calh.appendChild(calMon); calh.appendChild(btnNext);
-
-  var cgrid=el('div','cg'); cgrid.id='cgrid';
-  var tit=el('div','tit'); tit.id='tit';
-  var tgrid=el('div','tg'); tgrid.id='tgrid';
-
-  var btn3=el('button','btn bpri','Continuar'); btn3.disabled=true;
-  var back3=el('button','btn bsec','Voltar');
-  btn3.addEventListener('click',function(){ goTo(4) });
-  back3.addEventListener('click',function(){ goTo(2) });
-
-  p3.appendChild(calh); p3.appendChild(cgrid); p3.appendChild(tit);
-  p3.appendChild(tgrid); p3.appendChild(btn3); p3.appendChild(back3);
+  // PASSO 3
+  var p3=mk('div','pnl'); p3.id='p3';
+  p3.appendChild(mk('div','ptit')).textContent='Quando?';
+  p3.appendChild(mk('div','psub')).textContent='Escolha a data e horário';
+  var calh=mk('div','calh');
+  var bp=mk('button','caln'); bp.textContent='‹'; bp.addEventListener('click',function(){chMonth(-1)});
+  var bn=mk('button','caln'); bn.textContent='›'; bn.addEventListener('click',function(){chMonth(1)});
+  var cm=mk('div','calm'); cm.id='calmon';
+  calh.appendChild(bp); calh.appendChild(cm); calh.appendChild(bn);
+  var cg=mk('div','cg'); cg.id='cgrid';
+  var tt=mk('div','tit'); tt.id='tit';
+  var tg=mk('div','tg'); tg.id='tgrid';
+  var btn3=mk('button','btn bp'); btn3.textContent='Continuar'; btn3.disabled=true;
+  var bk3=mk('button','btn bs'); bk3.textContent='Voltar';
+  btn3.addEventListener('click',function(){goTo(4)});
+  bk3.addEventListener('click',function(){goTo(2)});
+  _btn3=btn3;
+  p3.appendChild(calh); p3.appendChild(cg); p3.appendChild(tt);
+  p3.appendChild(tg); p3.appendChild(btn3); p3.appendChild(bk3);
   wrap.appendChild(p3);
 
-  // ── PASSO 4: Confirmação ─────────────────────────────
-  var p4=el('div','pnl'); p4.id='p4';
-  p4.appendChild(el('div','ptit','Confirmar'));
-  p4.appendChild(el('div','psub','Revise e informe seus dados'));
-
-  var sumEl=el('div','sum');
-  sumEl.innerHTML='<div class="sumh"><p>Resumo do agendamento</p></div>'
-    +'<div class="sumb">'
+  // PASSO 4
+  var p4=mk('div','pnl'); p4.id='p4';
+  var sumEl=mk('div','sum');
+  sumEl.innerHTML='<div class="sumh"><p>Resumo do agendamento</p></div><div class="sumb">'
     +'<div class="sr"><span class="sk">Serviço</span><span class="sv" id="rs1">—</span></div>'
     +'<div class="sr"><span class="sk">Profissional</span><span class="sv" id="rs2">—</span></div>'
     +'<div class="sr"><span class="sk">Data</span><span class="sv" id="rs3">—</span></div>'
     +'<div class="sr"><span class="sk">Horário</span><span class="sv" id="rs4">—</span></div>'
     +'<div class="sr stot"><span class="sk">Total</span><span class="sv" id="rs5">—</span></div>'
     +'</div>';
-
-  var fn=el('div','fi'); fn.innerHTML='<label>Nome completo</label><input type="text" id="fn" placeholder="Seu nome" autocomplete="name">';
-  var fp=el('div','fi'); fp.innerHTML='<label>WhatsApp</label><input type="tel" id="fp" placeholder="(99) 99999-9999" autocomplete="tel">';
-  var fe=el('div','fi'); fe.innerHTML='<label>E-mail (opcional)</label><input type="email" id="fe" placeholder="seu@email.com" autocomplete="email">';
-
-  var btn4=el('button','btn bpri','Confirmar agendamento'); btn4.disabled=true;
-  var back4=el('button','btn bsec','Voltar');
-
-  p4.appendChild(sumEl); p4.appendChild(fn); p4.appendChild(fp); p4.appendChild(fe);
-  p4.appendChild(btn4); p4.appendChild(back4);
-
-  // bind form validation após adicionar ao DOM
-  p4.querySelector('#fn').addEventListener('input',function(){ checkForm(btn4) });
-  p4.querySelector('#fp').addEventListener('input',function(){ checkForm(btn4) });
-  btn4.addEventListener('click',function(){ doConfirm(cfg.succ||'Seu horário foi confirmado!') });
-  back4.addEventListener('click',function(){ goTo(3) });
+  var fi1=mk('div','fi'); fi1.innerHTML='<label>Nome completo</label><input type="text" id="fn" placeholder="Seu nome" autocomplete="name">';
+  var fi2=mk('div','fi'); fi2.innerHTML='<label>WhatsApp</label><input type="tel" id="fp" placeholder="(99) 99999-9999" autocomplete="tel">';
+  var fi3=mk('div','fi'); fi3.innerHTML='<label>E-mail (opcional)</label><input type="email" id="fe" placeholder="seu@email.com" autocomplete="email">';
+  var btn4=mk('button','btn bp'); btn4.textContent='Confirmar agendamento'; btn4.disabled=true;
+  var bk4=mk('button','btn bs'); bk4.textContent='Voltar';
+  bk4.addEventListener('click',function(){goTo(3)});
+  var succ=cfg.succ||'Seu horário foi confirmado!';
+  btn4.addEventListener('click',function(){doConfirm(succ,cfg)});
+  var ptit4=mk('div','ptit'); ptit4.textContent='Confirmar';
+  var psub4=mk('div','psub'); psub4.textContent='Revise e informe seus dados';
+  p4.appendChild(ptit4); p4.appendChild(psub4); p4.appendChild(sumEl);
+  p4.appendChild(fi1); p4.appendChild(fi2); p4.appendChild(fi3);
+  p4.appendChild(btn4); p4.appendChild(bk4);
+  fi1.querySelector('input').addEventListener('input',function(){chkForm(btn4)});
+  fi2.querySelector('input').addEventListener('input',function(){chkForm(btn4)});
   wrap.appendChild(p4);
 
-  // ── PASSO 5: Sucesso ─────────────────────────────────
-  var p5=el('div','pnl'); p5.id='p5';
-  var sw=el('div','sw');
+  // PASSO 5
+  var p5=mk('div','pnl'); p5.id='p5';
+  var sw=mk('div','sw');
   sw.innerHTML='<div class="sico">✓</div>'
     +'<div class="sttl">Agendado!</div>'
-    +'<div class="ssub">'+he(cfg.succ||'Seu horário foi confirmado!')+'</div>'
+    +'<div class="ssub">'+h(succ)+'</div>'
     +'<div class="cbox"><div class="clbl">Código de confirmação</div><div class="cval" id="ccode">#AG0000</div></div>'
     +'<div class="sum"><div class="sumb">'
     +'<div class="sr"><span class="sk">Serviço</span><span class="sv" id="cs1">—</span></div>'
@@ -334,28 +297,26 @@ function boot(){
     +'<div class="sr"><span class="sk">Data e hora</span><span class="sv" id="cs3">—</span></div>'
     +'<div class="sr stot"><span class="sk">Total</span><span class="sv" id="cs4">—</span></div>'
     +'</div></div>';
-  var btnNew=el('button','btn bsec','Fazer novo agendamento');
-  btnNew.style.marginTop='1rem';
-  btnNew.addEventListener('click',restart);
-  sw.appendChild(btnNew);
-  p5.appendChild(sw);
+  var bNew=mk('button','btn bs'); bNew.textContent='Fazer novo agendamento';
+  bNew.style.marginTop='1rem';
+  bNew.addEventListener('click',restart);
+  sw.appendChild(bNew); p5.appendChild(sw);
   wrap.appendChild(p5);
 
   app.appendChild(wrap);
-
-  // mostrar app
   document.getElementById('loading').style.display='none';
-  renderCal(btn3);
+  renderCal();
 }
 
-// ─── navegar entre passos ────────────────────────────────
+// === NAVEGAÇÃO ===
 function goTo(n){
   document.querySelectorAll('.pnl').forEach(function(p){p.classList.remove('on')});
-  document.getElementById('p'+n).classList.add('on');
+  var pnl=document.getElementById('p'+n); if(pnl) pnl.classList.add('on');
   for(var i=1;i<=4;i++){
-    var d=document.getElementById('d'+i), l=document.getElementById('l'+i);
-    d.className='sdot'+(i===n?' on':i<n?' dn':'');
-    l.className='slb'+(i===n?' on':'');
+    var d=document.getElementById('d'+i),l=document.getElementById('l'+i);
+    if(!d||!l) continue;
+    d.className='dot'+(i===n?' on':i<n?' dn':'');
+    l.className='dlb'+(i===n?' on':'');
   }
   window.scrollTo({top:0,behavior:'smooth'});
   if(n===4){
@@ -367,22 +328,19 @@ function goTo(n){
   }
 }
 
-// ─── calendário ─────────────────────────────────────────
+// === CALENDÁRIO ===
 var MN=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 var DN=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
-
-function renderCal(btn3ref){
-  var m=CALDT.getMonth(), y=CALDT.getFullYear();
-  document.getElementById('calmon').textContent=MN[m]+' '+y;
-  var g=document.getElementById('cgrid'); g.innerHTML='';
-  DN.forEach(function(d){
-    var e=el('div','cdn',d); g.appendChild(e);
-  });
-  var first=new Date(y,m,1).getDay(), total=new Date(y,m+1,0).getDate();
-  var today=new Date();
-  for(var i=0;i<first;i++){ g.appendChild(el('div','cd em',' ')); }
+function renderCal(){
+  var m=CALDT.getMonth(),y=CALDT.getFullYear();
+  var cm=document.getElementById('calmon'); if(cm) cm.textContent=MN[m]+' '+y;
+  var cg=document.getElementById('cgrid'); if(!cg) return;
+  cg.innerHTML='';
+  DN.forEach(function(d){var e=mk('div','cdn'); e.textContent=d; cg.appendChild(e);});
+  var first=new Date(y,m,1).getDay(),total=new Date(y,m+1,0).getDate(),today=new Date();
+  for(var i=0;i<first;i++){var e=mk('div','cd em'); e.textContent=' '; cg.appendChild(e);}
   for(var d=1;d<=total;d++){
-    var e=el('div','cd'), dt=new Date(y,m,d);
+    var e=mk('div','cd'),dt=new Date(y,m,d);
     var past=dt<new Date(today.getFullYear(),today.getMonth(),today.getDate());
     var blk=BLOCKED.indexOf(dt.getDay())>=0;
     e.textContent=d;
@@ -390,62 +348,57 @@ function renderCal(btn3ref){
     else{
       e.classList.add('av');
       if(d===today.getDate()&&m===today.getMonth()&&y===today.getFullYear()) e.classList.add('td');
-      (function(day,elem){
-        elem.addEventListener('click',function(){
+      (function(day,el){
+        el.addEventListener('click',function(){
           document.querySelectorAll('.cd').forEach(function(x){x.classList.remove('on')});
-          elem.classList.add('on');
-          var mo=('0'+(m+1)).slice(-2), da=('0'+day).slice(-2);
-          BK.date=da+'/'+mo+'/'+y;
-          renderTimes(btn3ref);
+          el.classList.add('on');
+          BK.date=('0'+day).slice(-2)+'/'+ ('0'+(m+1)).slice(-2)+'/'+y;
+          renderTimes();
         });
       })(d,e);
     }
-    g.appendChild(e);
+    cg.appendChild(e);
   }
-  // salvar referência para btn3
-  window._btn3=btn3ref;
 }
-
 function chMonth(dir){
   CALDT.setMonth(CALDT.getMonth()+dir);
   BK.date=''; BK.time='';
   var tg=document.getElementById('tgrid'); if(tg) tg.innerHTML='';
   var tt=document.getElementById('tit'); if(tt) tt.textContent='';
-  if(window._btn3) window._btn3.disabled=true;
-  renderCal(window._btn3);
+  if(_btn3) _btn3.disabled=true;
+  renderCal();
 }
-
-function renderTimes(btn3ref){
-  var tg=document.getElementById('tgrid'); tg.innerHTML='';
-  document.getElementById('tit').textContent='Disponível em '+BK.date;
+function renderTimes(){
+  var tg=document.getElementById('tgrid'); if(!tg) return;
+  tg.innerHTML='';
+  var tt=document.getElementById('tit'); if(tt) tt.textContent='Disponível em '+BK.date;
   SLOTS.forEach(function(s,i){
-    var e=el('div','ts',s);
+    var e=mk('div','ts'); e.textContent=s;
     if(BUSY.indexOf(i)>=0){ e.classList.add('bz'); }
     else{
       e.addEventListener('click',function(){
         document.querySelectorAll('.ts').forEach(function(x){x.classList.remove('on')});
         e.classList.add('on'); BK.time=s;
-        if(btn3ref) btn3ref.disabled=false;
+        if(_btn3) _btn3.disabled=false;
       });
     }
     tg.appendChild(e);
   });
 }
 
-// ─── formulário ─────────────────────────────────────────
-function checkForm(btn){
-  var n=document.getElementById('fn').value.trim();
-  var p=document.getElementById('fp').value.trim();
-  btn.disabled=!(n.length>2&&p.length>7);
+// === FORM ===
+function chkForm(btn){
+  var n=document.getElementById('fn'),fp=document.getElementById('fp');
+  if(!n||!fp) return;
+  btn.disabled=!(n.value.trim().length>2&&fp.value.trim().length>7);
 }
 
-function doConfirm(succ){
+// === CONFIRMAR ===
+function doConfirm(succ,cfg){
   var code='#AG'+Math.floor(1000+Math.random()*9000);
-  var cfg=D.cfg||{};
   var nome=document.getElementById('fn').value.trim();
   var fone=document.getElementById('fp').value.trim();
   var email=document.getElementById('fe').value.trim();
-
   document.getElementById('ccode').textContent=code;
   document.getElementById('cs1').textContent=BK.svc;
   document.getElementById('cs2').textContent=BK.prof;
@@ -455,71 +408,37 @@ function doConfirm(succ){
   document.getElementById('p5').classList.add('on');
   document.getElementById('steps').style.display='none';
   window.scrollTo({top:0,behavior:'smooth'});
-
-  // ── 1. Google Sheets ──────────────────────────────────
-  if(cfg.sheetsUrl){
-    var payload={
-      codigo:code,
-      estabelecimento:cfg.bizname||'',
-      servico:BK.svc,
-      profissional:BK.prof,
-      data:BK.date,
-      horario:BK.time,
-      preco:BK.price,
-      cliente:nome,
-      whatsapp:fone,
-      email:email,
-      timestamp:new Date().toLocaleString('pt-BR')
-    };
-    fetch(cfg.sheetsUrl,{
-      method:'POST',
-      mode:'no-cors',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify(payload)
+  // Google Sheets
+  if(cfg&&cfg.sheetsUrl){
+    fetch(cfg.sheetsUrl,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({codigo:code,estabelecimento:cfg.bizname||'',servico:BK.svc,profissional:BK.prof,
+        data:BK.date,horario:BK.time,preco:BK.price,cliente:nome,whatsapp:fone,email:email,
+        timestamp:new Date().toLocaleString('pt-BR')})
     }).catch(function(){});
   }
-
-  // ── 2. WhatsApp do estabelecimento ────────────────────
-  if(cfg.whatsapp){
-    var msg='🗓 *Novo Agendamento* '+code+'
-
-'
-      +'*Estabelecimento:* '+( cfg.bizname||'')+'
-'
-      +'*Serviço:* '+BK.svc+'
-'
-      +'*Profissional:* '+BK.prof+'
-'
-      +'*Data:* '+BK.date+' às '+BK.time+'
-'
-      +'*Valor:* '+BK.price+'
-
-'
-      +'*Cliente:* '+nome+'
-'
-      +'*WhatsApp:* '+fone
-      +(email?'
-*E-mail:* '+email:'');
-    var wurl='https://wa.me/'+cfg.whatsapp.replace(/\D/g,'')+'?text='+encodeURIComponent(msg);
-    setTimeout(function(){window.open(wurl,'_blank');},800);
+  // WhatsApp
+  if(cfg&&cfg.whatsapp){
+    var msg='🗓 *Novo Agendamento* '+code+'\n\n'
+      +'*Estabelecimento:* '+(cfg.bizname||'')+'\n'
+      +'*Serviço:* '+BK.svc+'\n*Profissional:* '+BK.prof+'\n'
+      +'*Data:* '+BK.date+' às '+BK.time+'\n*Valor:* '+BK.price+'\n\n'
+      +'*Cliente:* '+nome+'\n*WhatsApp:* '+fone+(email?'\n*E-mail:* '+email:'');
+    setTimeout(function(){
+      window.open('https://wa.me/'+cfg.whatsapp.replace(/\D/g,'')+
+        '?text='+encodeURIComponent(msg),'_blank');
+    },800);
   }
 }
 
+// === RESTART ===
 function restart(){
   BK={svc:'',prof:'',date:'',time:'',price:''};
   CALDT=new Date(); CALDT.setDate(1);
   document.getElementById('steps').style.display='flex';
   document.querySelectorAll('.card,.pcard,.cd,.ts').forEach(function(e){e.classList.remove('on')});
-  document.querySelectorAll('.bpri').forEach(function(b){b.disabled=true});
+  document.querySelectorAll('.bp').forEach(function(b){b.disabled=true});
   ['fn','fp','fe'].forEach(function(id){var e=document.getElementById(id);if(e)e.value='';});
-  goTo(1); renderCal(window._btn3);
-}
-
-// ─── iniciar ─────────────────────────────────────────────
-if(decode()){ boot(); }
-else{
-  document.getElementById('loading').style.display='none';
-  document.getElementById('errscreen').style.display='flex';
+  goTo(1); renderCal();
 }
 </script>
 </body>
