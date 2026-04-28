@@ -726,6 +726,30 @@ function sidebarHTML(){
     </div>
   </div>
 
+  <!-- NOTIFICAÇÕES -->
+  <div class="sidebar-section">
+    <button class="sidebar-toggle open" onclick="toggleSection(this)">📲 Notificações <span class="arrow">▼</span></button>
+    <div class="sidebar-body open">
+      <div>
+        <span class="field-label-s">WhatsApp do estabelecimento</span>
+        <input class="field-input-s" id="cfg-whatsapp" data-cfg="whatsapp" oninput="cfgInput(this,'whatsapp')" placeholder="5511999999999 (com DDI+DDD)">
+        <span style="font-size:10px;color:#444;display:block;margin-top:4px">Ex: 5562999887766 — sem espaços ou símbolos</span>
+      </div>
+      <div>
+        <span class="field-label-s">URL do Google Sheets (webhook)</span>
+        <input class="field-input-s" id="cfg-sheets" data-cfg="sheetsUrl" oninput="cfgInput(this,'sheetsUrl')" placeholder="https://script.google.com/macros/s/...">
+        <span style="font-size:10px;color:#444;display:block;margin-top:4px">Veja instruções abaixo para configurar</span>
+      </div>
+      <div style="background:#161410;border:1px solid rgba(201,169,110,.15);border-radius:8px;padding:.75rem;font-size:11px;color:#777;line-height:1.7">
+        <strong style="color:#c9a96e;display:block;margin-bottom:.35rem">Como configurar o Google Sheets:</strong>
+        1. Crie uma planilha no Google Sheets<br>
+        2. Acesse <strong style="color:#aaa">Extensões → Apps Script</strong><br>
+        3. Cole o script disponível em: <span style="color:#c9a96e">salve e copie a URL do deploy</span><br>
+        4. Cole a URL acima e salve
+      </div>
+    </div>
+  </div>
+
   <!-- TEXTOS -->
   <div class="sidebar-section">
     <button class="sidebar-toggle" onclick="toggleSection(this)">✏️ Textos <span class="arrow">▼</span></button>
@@ -911,8 +935,11 @@ function buildShareLink(){
   if(blkDom && blkDom.checked) blocked.push(0);
   if(blkSab && blkSab.checked) blocked.push(6);
 
+  // Logo removido do link — evita link gigante
+  var cfgShare = Object.assign({}, cfg, {slots: slots, blocked: blocked});
+  delete cfgShare.logoDataUrl;
   var data = {
-    cfg: Object.assign({}, cfg, {slots: slots, blocked: blocked}),
+    cfg: cfgShare,
     services: services,
     profs: profs,
     cardStyle: cardStyle,
