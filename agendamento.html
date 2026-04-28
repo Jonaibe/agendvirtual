@@ -409,6 +409,11 @@ function checkForm(btn){
 
 function doConfirm(succ){
   var code='#AG'+Math.floor(1000+Math.random()*9000);
+  var cfg=D.cfg||{};
+  var nome=document.getElementById('fn').value.trim();
+  var fone=document.getElementById('fp').value.trim();
+  var email=document.getElementById('fe').value.trim();
+
   document.getElementById('ccode').textContent=code;
   document.getElementById('cs1').textContent=BK.svc;
   document.getElementById('cs2').textContent=BK.prof;
@@ -418,6 +423,54 @@ function doConfirm(succ){
   document.getElementById('p5').classList.add('on');
   document.getElementById('steps').style.display='none';
   window.scrollTo({top:0,behavior:'smooth'});
+
+  // ── 1. Google Sheets ──────────────────────────────────
+  if(cfg.sheetsUrl){
+    var payload={
+      codigo:code,
+      estabelecimento:cfg.bizname||'',
+      servico:BK.svc,
+      profissional:BK.prof,
+      data:BK.date,
+      horario:BK.time,
+      preco:BK.price,
+      cliente:nome,
+      whatsapp:fone,
+      email:email,
+      timestamp:new Date().toLocaleString('pt-BR')
+    };
+    fetch(cfg.sheetsUrl,{
+      method:'POST',
+      mode:'no-cors',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(payload)
+    }).catch(function(){});
+  }
+
+  // ── 2. WhatsApp do estabelecimento ────────────────────
+  if(cfg.whatsapp){
+    var msg='🗓 *Novo Agendamento* '+code+'
+
+'
+      +'*Estabelecimento:* '+( cfg.bizname||'')+'
+'
+      +'*Serviço:* '+BK.svc+'
+'
+      +'*Profissional:* '+BK.prof+'
+'
+      +'*Data:* '+BK.date+' às '+BK.time+'
+'
+      +'*Valor:* '+BK.price+'
+
+'
+      +'*Cliente:* '+nome+'
+'
+      +'*WhatsApp:* '+fone
+      +(email?'
+*E-mail:* '+email:'');
+    var wurl='https://wa.me/'+cfg.whatsapp.replace(/\D/g,'')+'?text='+encodeURIComponent(msg);
+    setTimeout(function(){window.open(wurl,'_blank');},800);
+  }
 }
 
 function restart(){
