@@ -40,13 +40,45 @@ var SLOTS=[],BLOCKED=[],BUSY=[1,4,7];
 // ─── decode URL ─────────────────────────────────────────
 function decode(){
   try{
-    var h=location.hash.replace(/^#/,''), raw='';
-    if(h.indexOf('d=')===0) raw=decodeURIComponent(h.slice(2));
-    else{ var p=new URLSearchParams(location.search); raw=p.get('d')||''; }
-    if(!raw) return false;
-    D=JSON.parse(decodeURIComponent(escape(atob(raw))));
+    // Pegar o dado bruto do hash ou query string
+    var raw = '';
+    var hash = location.hash;
+    if(hash && hash.indexOf('d=') >= 0){
+      raw = hash.slice(hash.indexOf('d=')+2);
+    } else {
+      var search = location.search;
+      if(search && search.indexOf('d=') >= 0){
+        raw = search.slice(search.indexOf('d=')+2);
+        // remover outros params se houver
+        if(raw.indexOf('&') >= 0) raw = raw.slice(0, raw.indexOf('&'));
+      }
+    }
+    if(!raw){ console.error('decode: sem dados na URL'); return false; }
+
+    // Decodificar URL encoding (%2B, %2F, %3D etc)
+    raw = raw.replace(/%2B/gi,'+').replace(/%2F/gi,'/').replace(/%3D/gi,'=');
+    try{ raw = decodeURIComponent(raw); }catch(e){}
+
+    // Decodificar Base64 → UTF-8
+    var bytes = atob(raw);
+    var json_str = '';
+    try{
+      // Método moderno UTF-8
+      var arr = new Uint8Array(bytes.length);
+      for(var i=0;i<bytes.length;i++) arr[i]=bytes.charCodeAt(i);
+      json_str = new TextDecoder('utf-8').decode(arr);
+    }catch(e){
+      // Fallback
+      try{ json_str = decodeURIComponent(escape(bytes)); }catch(e2){ json_str = bytes; }
+    }
+
+    D = JSON.parse(json_str);
+    console.log('decode OK, bizname:', D.cfg && D.cfg.bizname);
     return true;
-  }catch(e){console.error('decode',e);return false;}
+  }catch(e){
+    console.error('decode ERRO:', e);
+    return false;
+  }
 }
 
 // ─── CSS dinâmico ────────────────────────────────────────
