@@ -843,20 +843,20 @@ function copySaveLink(){
   setTimeout(function(){document.getElementById('save-link-display').style.color=''},1500);
 }
 
-function buildShareLink(){
-  // Garante que cfg.slots e cfg.blocked estão atualizados com os valores atuais do DOM
+function buildShareLink() {
   var slotsTextarea = document.getElementById('cfg-slots');
-  var slots = slotsTextarea ? slotsTextarea.value.split('\n').map(function(s){return s.trim()}).filter(Boolean) : [];
+  var slots = slotsTextarea ? slotsTextarea.value.split('\n').map(function(s) { return s.trim(); }).filter(Boolean) : [];
   var blkDom = document.getElementById('blk-dom');
   var blkSab = document.getElementById('blk-sab');
   var blocked = [];
-  if(blkDom && blkDom.checked) blocked.push(0);
-  if(blkSab && blkSab.checked) blocked.push(6);
+  if (blkDom && blkDom.checked) blocked.push(0);
+  if (blkSab && blkSab.checked) blocked.push(6);
   cfg.slots = slots;
   cfg.blocked = blocked;
-  
+
   var cfgShare = Object.assign({}, cfg);
   delete cfgShare.logoDataUrl;
+
   var data = {
     cfg: cfgShare,
     services: services,
@@ -868,10 +868,21 @@ function buildShareLink(){
     slots: slots,
     blocked: blocked
   };
+
   var json = JSON.stringify(data);
-  var b64 = btoa(encodeURIComponent(json).replace(/%([0-9A-F]{2})/g, function(m,p){return String.fromCharCode(parseInt(p,16))}));
+  // --- Geração de Base64 URL-safe ---
+  // 1. Converte UTF-8 para Base64 padrão
+  var utf8Bytes = new TextEncoder().encode(json);
+  var binaryString = '';
+  for (var i = 0; i < utf8Bytes.length; i++) {
+    binaryString += String.fromCharCode(utf8Bytes[i]);
+  }
+  var base64Std = btoa(binaryString);
+  // 2. Substitui caracteres para URL-safe
+  var base64Url = base64Std.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  // ---------------------------------
   var base = location.href.replace(/\/[^\/]*(\?.*)?$/, '/');
-  return base + 'agendamento.html#d=' + b64;
+  return base + 'agendamento.html#d=' + base64Url;
 }
 function openShareModal(){
   var link = buildShareLink();
