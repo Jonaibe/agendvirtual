@@ -124,7 +124,7 @@ if(!D){
   +'.card.on{border-color:'+ac+'!important;'+(cs==='solid'?'background:rgba('+ar+',.2)':'cs'==='glass'?'background:rgba('+ar+',.1)':'background:rgba('+ar+',.09)')+'}'
   +'.pcard{border:1px solid rgba('+ar+',.18);border-radius:'+cr+'px;padding:.9rem 1rem;cursor:pointer;transition:.25s;background:'+sf+';display:flex;align-items:center;gap:12px;-webkit-tap-highlight-color:transparent}'
   +'.pcard:active{transform:scale(.98)}.pcard.on{border-color:'+ac+';background:rgba('+ar+',.08)}'
-  +'.cd{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:7px;font-size:13px;border:1px solid transparent;color:#8a7e72;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent;transition:.15s}'
+  +'.cd{min-height:36px;display:flex;align-items:center;justify-content:center;border-radius:7px;font-size:13px;border:1px solid transparent;color:#8a7e72;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent;transition:.15s}'
   +'.cd.av{color:#f0ebe4}.cd.av:active{background:'+sf2+';border-color:rgba('+ar+',.35)}'
   +'.cd.on{background:'+ac+';color:'+bg+';font-weight:500}'
   +'.cd.td{border-color:rgba('+ar+',.35);color:'+ac+'}'
@@ -187,7 +187,7 @@ if(!D){
   +'<div id="calmon" style="font-family:\'Cormorant Garamond\',serif;font-size:1.15rem;color:'+a2+'"></div>'
   +'<button id="cnext" style="width:32px;height:32px;border:1px solid rgba('+ar+',.35);border-radius:8px;background:none;color:'+ac+';cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center">›</button>'
   +'</div>'
-  +'<div id="cgrid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:1.25rem"></div>'
+  +'<div id="cgrid" style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px;margin-bottom:1.25rem"></div>'
   +'<div id="tit" style="font-size:10px;letter-spacing:.1em;color:#8a7e72;text-transform:uppercase;margin-bottom:.65rem"></div>'
   +'<div id="tgrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:1.5rem"></div>'
   +'<button class="btn bp" id="btn3" disabled>Continuar</button>'
@@ -315,7 +315,7 @@ function renderCal(){
   cg.innerHTML='';
   DN.forEach(function(d){
     var e=document.createElement('div');
-    e.style.cssText='text-align:center;font-size:9px;color:#8a7e72;padding:4px 0;text-transform:uppercase';
+    e.style.cssText='text-align:center;font-size:9px;color:#8a7e72;padding:4px 0;text-transform:uppercase;min-height:24px;display:flex;align-items:center;justify-content:center;';
     e.textContent=d;cg.appendChild(e);
   });
   var first=new Date(y,m,1).getDay(),total=new Date(y,m+1,0).getDate(),today=new Date();
@@ -327,9 +327,10 @@ function renderCal(){
     var past=dt<new Date(today.getFullYear(),today.getMonth(),today.getDate());
     var blk=BLOCKED.indexOf(dt.getDay())>=0;
     e.textContent=d;
-    if(past||blk){e.className='cd pa';}
+    e.style.cssText='min-height:36px;display:flex;align-items:center;justify-content:center;border-radius:7px;font-size:13px;border:1px solid transparent;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:.15s;';
+    if(past||blk){e.className='cd pa';e.style.color='transparent';e.style.pointerEvents='none';}
     else{
-      e.className='cd av';
+      e.className='cd av';e.style.color='#f0ebe4';
       if(d===today.getDate()&&m===today.getMonth()&&y===today.getFullYear())e.classList.add('td');
       (function(day,el){
         el.addEventListener('click',function(){
