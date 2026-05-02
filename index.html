@@ -15,56 +15,75 @@
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden}
 
-/* telas */
+/* ── TELAS (auth / trial / paywall / editor) ── */
 .screen{display:none;min-height:100vh}
 .screen.active{display:flex}
 
-/* auth screen */
+/* ══════════════════════════════════════
+   AUTH SCREEN
+══════════════════════════════════════ */
 #screen-auth{flex-direction:column;align-items:center;justify-content:center;padding:2rem 1.25rem;
   background:radial-gradient(ellipse at 50% -20%,rgba(201,169,110,.12) 0%,transparent 60%)}
+
 .auth-logo{text-align:center;margin-bottom:2.5rem}
 .auth-logo-name{font-family:'Cormorant Garamond',serif;font-size:2.2rem;color:var(--gold2);letter-spacing:.12em;font-weight:300}
 .auth-logo-sub{font-size:11px;letter-spacing:.3em;color:var(--muted);text-transform:uppercase;margin-top:4px}
+
 .auth-card{width:100%;max-width:420px;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:2rem 1.75rem;box-shadow:0 24px 60px rgba(0,0,0,.5)}
+
 .auth-tabs{display:flex;gap:0;margin-bottom:1.75rem;background:var(--bg);border-radius:12px;padding:4px}
 .auth-tab{flex:1;padding:.6rem;border:none;border-radius:9px;background:none;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:400;cursor:pointer;transition:.2s;letter-spacing:.04em}
 .auth-tab.active{background:var(--gold);color:#0a0a0a;font-weight:500}
+
 .auth-form{display:flex;flex-direction:column;gap:.9rem}
 .auth-form.hidden{display:none}
+
 .field-label{font-size:10px;letter-spacing:.12em;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:.35rem}
 .field-input{width:100%;background:var(--bg);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:.7rem 1rem;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;transition:.2s;-webkit-appearance:none}
 .field-input:focus{border-color:var(--gold)}
 .field-input::placeholder{color:#3a3530}
+
 .btn-auth{width:100%;padding:.85rem;border-radius:12px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;letter-spacing:.06em;cursor:pointer;border:none;transition:all .25s;margin-top:.25rem}
 .btn-auth-primary{background:var(--gold);color:#0a0a0a}
 .btn-auth-primary:hover{background:var(--gold2);transform:translateY(-1px)}
 .btn-auth-primary:disabled{opacity:.4;cursor:not-allowed;transform:none}
+
 .auth-err{font-size:12px;color:var(--red);text-align:center;min-height:16px}
 .auth-note{font-size:11px;color:var(--muted);text-align:center;line-height:1.6;margin-top:.5rem}
 
-/* trial / paywall */
+/* ══════════════════════════════════════
+   TRIAL / PAYWALL SCREENS
+══════════════════════════════════════ */
 #screen-trial,#screen-paywall{flex-direction:column;align-items:center;justify-content:center;padding:2rem 1.25rem;
   background:radial-gradient(ellipse at 50% -10%,rgba(201,169,110,.1) 0%,transparent 60%)}
+
 .info-card{width:100%;max-width:420px;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:2rem 1.75rem;text-align:center}
 .info-icon{font-size:3rem;margin-bottom:1rem}
 .info-title{font-family:'Cormorant Garamond',serif;font-size:1.8rem;color:var(--gold2);margin-bottom:.5rem;font-weight:300}
 .info-sub{font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:1.5rem}
+
 .trial-badge{display:inline-block;background:rgba(77,204,143,.12);border:1px solid rgba(77,204,143,.3);border-radius:20px;padding:.4rem 1rem;font-size:12px;color:var(--green);letter-spacing:.08em;margin-bottom:1.25rem}
 .trial-days{font-family:'Cormorant Garamond',serif;font-size:4rem;color:var(--gold);font-weight:300;line-height:1;margin:.5rem 0 .25rem}
 .trial-days-label{font-size:11px;color:var(--muted);letter-spacing:.2em;text-transform:uppercase}
+
 .pay-price{font-family:'Cormorant Garamond',serif;font-size:3.5rem;color:var(--gold);font-weight:300;line-height:1;margin:.75rem 0 0}
 .pay-period{font-size:12px;color:var(--muted);letter-spacing:.12em;margin-bottom:1.5rem}
 .pay-features{text-align:left;margin-bottom:1.5rem;display:flex;flex-direction:column;gap:.5rem}
 .pay-feat{display:flex;align-items:center;gap:8px;font-size:13px;color:#ccc}
 .pay-feat::before{content:'✓';color:var(--green);font-weight:500;flex-shrink:0}
+
 .btn-cta{width:100%;padding:.9rem;border-radius:12px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;letter-spacing:.06em;cursor:pointer;border:none;transition:all .25s;margin-bottom:.75rem}
 .btn-cta-gold{background:var(--gold);color:#0a0a0a}
 .btn-cta-gold:hover{background:var(--gold2);transform:translateY(-1px)}
 .btn-cta-ghost{background:none;border:1px solid var(--border);color:var(--muted)}
 .btn-cta-ghost:hover{border-color:var(--border2);color:var(--text)}
 
-/* editor */
+/* ══════════════════════════════════════
+   EDITOR SCREEN (responsivo)
+══════════════════════════════════════ */
 #screen-editor{flex-direction:column}
+
+/* top bar */
 .topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:.65rem 1rem;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-shrink:0;position:sticky;top:0;z-index:100}
 .topbar-brand{font-size:13px;font-weight:500;color:var(--gold);letter-spacing:.05em}
 .topbar-brand span{color:#444;font-weight:300;font-size:11px}
@@ -76,15 +95,25 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
 .tbtn-gold:hover{background:var(--gold2)}
 .tbtn-red{background:rgba(255,77,77,.12);color:#ff7070;border:1px solid rgba(255,77,77,.2)}
 .tbtn-red:hover{background:rgba(255,77,77,.2)}
+
+/* trial badge na topbar */
 .trial-info{font-size:10px;color:var(--green);background:rgba(77,204,143,.1);border:1px solid rgba(77,204,143,.2);border-radius:20px;padding:.25rem .65rem;letter-spacing:.04em}
+
+/* editor layout: mobile = abas / desktop = split */
 .editor-layout{flex:1;display:flex;overflow:hidden}
+
+/* MOBILE: tabs nav em baixo + painel único */
 .mobile-tabs{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);z-index:99;padding:.5rem .75rem;gap:4px}
 .mob-tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:.4rem .25rem;border:none;background:none;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:9px;cursor:pointer;border-radius:8px;transition:.2s;letter-spacing:.04em}
 .mob-tab .mob-icon{font-size:18px;line-height:1}
 .mob-tab.active{color:var(--gold);background:rgba(201,169,110,.08)}
+
+/* SIDEBAR */
 .sidebar{width:340px;min-width:340px;background:var(--surface);border-right:1px solid var(--border);overflow-y:auto;flex-shrink:0}
 .sidebar::-webkit-scrollbar{width:3px}
 .sidebar::-webkit-scrollbar-thumb{background:#2a2a2a;border-radius:4px}
+
+/* PREVIEW PANEL */
 .preview-panel{flex:1;overflow:hidden;display:flex;flex-direction:column;background:#1a1614}
 .preview-bar{background:var(--surface);border-bottom:1px solid var(--border);padding:.4rem .75rem;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-shrink:0}
 .preview-dots{display:flex;gap:4px}
@@ -96,6 +125,8 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
 .preview-frame-wrap::-webkit-scrollbar{width:3px}
 .preview-frame-wrap::-webkit-scrollbar-thumb{background:#2a2a2a}
 iframe#preview{width:100%;min-height:100%;border:none;display:block}
+
+/* sidebar sections */
 .sidebar-section{border-bottom:1px solid rgba(255,255,255,.05)}
 .sidebar-toggle{width:100%;background:none;border:none;color:#ddd;padding:.9rem 1rem;display:flex;align-items:center;justify-content:space-between;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;letter-spacing:.04em;text-align:left;transition:.15s}
 .sidebar-toggle:hover{background:rgba(255,255,255,.03);color:#fff}
@@ -103,6 +134,7 @@ iframe#preview{width:100%;min-height:100%;border:none;display:block}
 .sidebar-toggle.open .arrow{transform:rotate(180deg);color:var(--gold)}
 .sidebar-body{display:none;padding:.85rem 1rem 1rem;gap:10px;flex-direction:column}
 .sidebar-body.open{display:flex}
+
 .field-label-s{font-size:9px;letter-spacing:.12em;color:#555;text-transform:uppercase;margin-bottom:.3rem;display:block}
 .field-input-s{width:100%;background:var(--bg);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:.55rem .75rem;color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px;outline:none;transition:.2s;-webkit-appearance:none}
 .field-input-s:focus{border-color:rgba(201,169,110,.5)}
@@ -110,11 +142,15 @@ iframe#preview{width:100%;min-height:100%;border:none;display:block}
 textarea.field-input-s{resize:none;height:54px;line-height:1.5}
 .color-row{display:flex;gap:6px;align-items:center}
 .color-picker{width:36px;height:32px;border-radius:7px;border:1px solid rgba(255,255,255,.1);cursor:pointer;padding:2px;background:var(--bg);flex-shrink:0}
+
+/* logo upload */
 .logo-upload-area{border:1px dashed rgba(255,255,255,.12);border-radius:10px;padding:1rem;text-align:center;cursor:pointer;transition:.2s;background:rgba(255,255,255,.02)}
 .logo-upload-area:hover{border-color:rgba(201,169,110,.4)}
 .logo-upload-area input{display:none}
 .logo-preview-img{max-width:110px;max-height:44px;object-fit:contain;display:none;margin:0 auto .4rem}
 .upload-hint{font-size:11px;color:#444;line-height:1.4}
+
+/* service / prof items */
 .item-list{display:flex;flex-direction:column;gap:6px}
 .item-row{background:var(--bg);border:1px solid rgba(255,255,255,.07);border-radius:9px;padding:.65rem}
 .item-row-top{display:flex;gap:5px;margin-bottom:5px;align-items:center}
@@ -126,9 +162,13 @@ textarea.field-input-s{resize:none;height:54px;line-height:1.5}
 .add-btn:hover{background:rgba(201,169,110,.1)}
 .prof-row{background:var(--bg);border:1px solid rgba(255,255,255,.07);border-radius:9px;padding:.65rem}
 .prof-row-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:5px}
+
+/* themes */
 .theme-row{display:flex;gap:7px;flex-wrap:wrap}
 .theme-dot{width:26px;height:26px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:.2s;flex-shrink:0}
 .theme-dot.active{border-color:#fff;transform:scale(1.1)}
+
+/* card style gallery */
 .card-gallery{display:grid;grid-template-columns:1fr 1fr;gap:6px}
 .card-style-opt{border:1.5px solid rgba(255,255,255,.1);border-radius:9px;padding:.5rem;cursor:pointer;transition:all .2s;background:var(--bg);display:flex;flex-direction:column;align-items:center;gap:5px}
 .card-style-opt:hover{border-color:rgba(201,169,110,.4)}
@@ -136,6 +176,8 @@ textarea.field-input-s{resize:none;height:54px;line-height:1.5}
 .cso-label{font-size:9px;color:#666;letter-spacing:.05em;text-align:center}
 .card-style-opt.active .cso-label{color:var(--gold)}
 .cso-preview{width:100%;height:46px;border-radius:5px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+
+/* toggles */
 .toggle-row{display:flex;align-items:center;justify-content:space-between}
 .toggle-lbl{font-size:11px;color:#aaa}
 .toggle-sw{position:relative;width:36px;height:20px}
@@ -144,10 +186,13 @@ textarea.field-input-s{resize:none;height:54px;line-height:1.5}
 .toggle-track:before{content:'';position:absolute;width:14px;height:14px;left:3px;bottom:3px;background:#555;border-radius:50%;transition:.3s}
 .toggle-sw input:checked+.toggle-track{background:rgba(201,169,110,.3)}
 .toggle-sw input:checked+.toggle-track:before{transform:translateX(16px);background:var(--gold)}
+
 .icon-size-row,.radius-row,.cols-row{display:flex;gap:5px}
 .ctrl-btn{flex:1;padding:.38rem;border-radius:6px;background:var(--bg);border:1px solid rgba(255,255,255,.1);color:#666;font-size:11px;cursor:pointer;text-align:center;transition:.2s;font-family:'DM Sans',sans-serif}
 .ctrl-btn.active{border-color:var(--gold);color:var(--gold);background:rgba(201,169,110,.07)}
 .divider{height:1px;background:rgba(255,255,255,.05);margin:.1rem 0}
+
+/* share modal */
 .modal-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:200;align-items:center;justify-content:center;padding:1rem}
 .modal-backdrop.show{display:flex}
 .modal{background:var(--surface);border:1px solid rgba(201,169,110,.25);border-radius:18px;padding:1.5rem;max-width:440px;width:100%}
@@ -160,15 +205,23 @@ textarea.field-input-s{resize:none;height:54px;line-height:1.5}
 .mbtn-gold:hover{background:var(--gold2)}
 .mbtn-ghost{background:rgba(255,255,255,.06);color:#aaa;border:1px solid rgba(255,255,255,.1)}
 .mbtn-ghost:hover{background:rgba(255,255,255,.1)}
+
+/* mobile panel view */
 .mobile-panel{display:none}
+
+/* ── RESPONSIVO ── */
 @media(max-width:768px){
   .sidebar{display:none}
   .preview-panel{display:none}
   .mobile-tabs{display:flex}
   .mobile-panel{display:flex;flex-direction:column;flex:1;overflow:hidden;padding-bottom:70px}
+  /* mostrar painel ativo */
   .mobile-panel-pane{display:none;flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+  .mobile-panel-pane::-webkit-scrollbar{width:0}
   .mobile-panel-pane.active{display:flex;flex-direction:column}
+  /* painel editar = sidebar responsivo */
   #mpane-edit{background:var(--surface)}
+  /* painel preview = iframe */
   #mpane-preview{background:#1a1614}
   #mpane-preview iframe{width:100%;height:100%;border:none;flex:1}
 }
@@ -182,18 +235,23 @@ textarea.field-input-s{resize:none;height:54px;line-height:1.5}
 </head>
 <body>
 
-<!-- AUTH -->
+<!-- ════════════════════════════════════
+     SCREEN: AUTH
+════════════════════════════════════ -->
 <div class="screen active" id="screen-auth">
   <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;padding:2rem 1.25rem;background:radial-gradient(ellipse at 50% -20%,rgba(201,169,110,.12) 0%,transparent 60%)">
     <div class="auth-logo">
       <div class="auth-logo-name">AgendVirtual</div>
       <div class="auth-logo-sub">Sistema de Agendamento</div>
     </div>
+
     <div class="auth-card">
       <div class="auth-tabs">
         <button class="auth-tab active" onclick="switchAuthTab('login')">Entrar</button>
         <button class="auth-tab" onclick="switchAuthTab('register')">Cadastrar</button>
       </div>
+
+      <!-- LOGIN -->
       <div class="auth-form" id="form-login">
         <div><span class="field-label">E-mail</span><input class="field-input" id="login-email" type="email" placeholder="seu@email.com" autocomplete="email"></div>
         <div><span class="field-label">Senha</span><input class="field-input" id="login-pass" type="password" placeholder="••••••••" autocomplete="current-password"></div>
@@ -201,6 +259,8 @@ textarea.field-input-s{resize:none;height:54px;line-height:1.5}
         <button class="btn-auth btn-auth-primary" onclick="doLogin()">Entrar</button>
         <p class="auth-note">Ainda não tem conta? <a href="#" onclick="switchAuthTab('register');return false" style="color:var(--gold)">Cadastre-se grátis</a></p>
       </div>
+
+      <!-- REGISTER -->
       <div class="auth-form hidden" id="form-register">
         <div><span class="field-label">Nome do estabelecimento</span><input class="field-input" id="reg-name" type="text" placeholder="Ex: Nail Studio da Ana" autocomplete="organization"></div>
         <div><span class="field-label">E-mail</span><input class="field-input" id="reg-email" type="email" placeholder="seu@email.com" autocomplete="email"></div>
@@ -214,7 +274,9 @@ textarea.field-input-s{resize:none;height:54px;line-height:1.5}
   </div>
 </div>
 
-<!-- TRIAL -->
+<!-- ════════════════════════════════════
+     SCREEN: TRIAL WELCOME
+════════════════════════════════════ -->
 <div class="screen" id="screen-trial">
   <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;padding:2rem 1.25rem;background:radial-gradient(ellipse at 50% -10%,rgba(201,169,110,.1) 0%,transparent 60%)">
     <div class="info-card">
@@ -230,7 +292,9 @@ textarea.field-input-s{resize:none;height:54px;line-height:1.5}
   </div>
 </div>
 
-<!-- PAYWALL -->
+<!-- ════════════════════════════════════
+     SCREEN: PAYWALL
+════════════════════════════════════ -->
 <div class="screen" id="screen-paywall">
   <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;padding:2rem 1.25rem;background:radial-gradient(ellipse at 50% -10%,rgba(201,169,110,.1) 0%,transparent 60%)">
     <div class="info-card">
@@ -248,16 +312,28 @@ textarea.field-input-s{resize:none;height:54px;line-height:1.5}
         <div class="pay-feat">Suporte por WhatsApp</div>
       </div>
       <a href="https://mpago.la/2QjwYAD" target="_blank" style="text-decoration:none;display:block">
-        <button class="btn-cta btn-cta-gold" onclick="simulatePay()">💳 Assinar agora — R$29,90/mês</button>
+        <button class="btn-cta btn-cta-gold">💳 Assinar agora — R$29,90/mês</button>
       </a>
+      <div style="margin-top:1rem;text-align:left">
+        <p style="font-size:11px;color:#777;margin-bottom:.5rem;text-align:center">Já pagou? Digite o código de ativação abaixo:</p>
+        <div style="display:flex;gap:8px">
+          <input id="activation-code" type="text" placeholder="Ex: AGEND-XXXX" style="flex:1;background:#1a1a1a;border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:.6rem .8rem;color:#f0ebe4;font-family:'DM Sans',sans-serif;font-size:13px;outline:none;text-transform:uppercase;letter-spacing:.1em">
+          <button onclick="activateCode()" style="padding:.6rem 1rem;background:#c9a96e;color:#0a0a0a;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;white-space:nowrap">Ativar</button>
+        </div>
+        <p id="activation-err" style="font-size:11px;color:#ff6060;margin-top:.4rem;min-height:16px;text-align:center"></p>
+      </div>
       <button class="btn-cta btn-cta-ghost" onclick="goToEditor()" id="btn-trial-continue" style="display:none">Continuar com trial</button>
       <p style="font-size:10px;color:#444;text-align:center;margin-top:.5rem">Pagamento seguro via Mercado Pago</p>
     </div>
   </div>
 </div>
 
-<!-- EDITOR -->
+<!-- ════════════════════════════════════
+     SCREEN: EDITOR
+════════════════════════════════════ -->
 <div class="screen" id="screen-editor">
+
+  <!-- TOP BAR -->
   <div class="topbar">
     <div class="topbar-brand">AgendVirtual <span id="topbar-biz-name">/ Painel</span></div>
     <div class="topbar-right">
@@ -268,8 +344,15 @@ textarea.field-input-s{resize:none;height:54px;line-height:1.5}
     </div>
   </div>
 
+  <!-- DESKTOP LAYOUT -->
   <div class="editor-layout">
-    <div class="sidebar" id="sidebar-desktop"></div>
+
+    <!-- SIDEBAR (desktop) -->
+    <div class="sidebar" id="sidebar-desktop">
+      <!-- conteúdo injetado por buildSidebarContent() -->
+    </div>
+
+    <!-- PREVIEW (desktop) -->
     <div class="preview-panel">
       <div class="preview-bar">
         <div class="preview-dots">
@@ -286,13 +369,17 @@ textarea.field-input-s{resize:none;height:54px;line-height:1.5}
     </div>
   </div>
 
+  <!-- MOBILE LAYOUT -->
   <div class="mobile-panel">
-    <div class="mobile-panel-pane active" id="mpane-edit"></div>
+    <div class="mobile-panel-pane active" id="mpane-edit">
+      <!-- conteúdo injetado -->
+    </div>
     <div class="mobile-panel-pane" id="mpane-preview">
       <iframe id="preview-mobile" scrolling="yes" style="width:100%;flex:1;border:none;min-height:calc(100vh - 130px)"></iframe>
     </div>
   </div>
 
+  <!-- MOBILE TABS -->
   <div class="mobile-tabs" id="mobile-tabs">
     <button class="mob-tab active" id="mobtab-edit" onclick="switchMobTab('edit')">
       <span class="mob-icon">✏️</span>Editar
@@ -304,9 +391,10 @@ textarea.field-input-s{resize:none;height:54px;line-height:1.5}
       <span class="mob-icon">📤</span>Enviar
     </button>
   </div>
-</div>
 
-<!-- MODAIS -->
+</div><!-- /screen-editor -->
+
+<!-- ═══════════ SHARE MODAL ═══════════ -->
 <div class="modal-backdrop" id="shareModal">
   <div class="modal">
     <h3>📤 Link do cliente</h3>
@@ -321,6 +409,7 @@ textarea.field-input-s{resize:none;height:54px;line-height:1.5}
   </div>
 </div>
 
+<!-- ═══════════ SAVE CONFIRM MODAL ═══════════ -->
 <div class="modal-backdrop" id="saveModal">
   <div class="modal">
     <h3>✓ Configurações salvas</h3>
@@ -335,7 +424,8 @@ textarea.field-input-s{resize:none;height:54px;line-height:1.5}
 
 <script>
 /* ═══════════════════════════════════════════════════════
-   AUTENTICAÇÃO LOCAL (localStorage)
+   SIMPLE LOCAL AUTH (localStorage)
+   Em produção: substituir por backend real
 ═══════════════════════════════════════════════════════ */
 var STORAGE_KEY = 'agendvirtual_users';
 var SESSION_KEY = 'agendvirtual_session';
@@ -398,12 +488,13 @@ function doLogout(){
 
 function routeUser(sess){
   if(sess.paid){ goToEditor(); return; }
-  if(Date.now() < sess.trialExpiry){ showTrialScreen(sess); return; }
+  if(sess.trialExpiry && Date.now() < sess.trialExpiry){ showTrialScreen(sess); return; }
   showPaywall(false);
 }
 
 function showTrialScreen(sess){
-  var days = Math.max(0, Math.ceil((sess.trialExpiry - Date.now()) / (24*60*60*1000)));
+  var ms = sess.trialExpiry - Date.now();
+  var days = ms > 0 ? Math.ceil(ms / (24*60*60*1000)) : 0;
   document.getElementById('trial-name-disp').textContent = sess.name+'!';
   document.getElementById('trial-days-left').textContent = days;
   showScreen('trial');
@@ -415,7 +506,35 @@ function showPaywall(hasTrial){
 }
 
 function goToPaywall(){ showPaywall(true); }
+
 function simulatePay(){}
+
+// Códigos válidos de ativação (você pode adicionar mais)
+var VALID_CODES = ['AGEND-2024','AGEND-2025','AGEND-2026','AGEND-PRO1','AGEND-PRO2',
+  'AGEND-PRO3','AGEND-PRO4','AGEND-PRO5','AGEND-PRO6','AGEND-PRO7','AGEND-PRO8',
+  'AGEND-PRO9','AGEND-VIP1','AGEND-VIP2','AGEND-VIP3'];
+
+function activateCode(){
+  var code = (document.getElementById('activation-code').value||'').trim().toUpperCase();
+  var err  = document.getElementById('activation-err');
+  if(!code){ err.textContent='Digite o código de ativação.'; return; }
+  // Verificar código
+  var usedCodes = JSON.parse(localStorage.getItem('agendvirtual_used_codes')||'[]');
+  if(!VALID_CODES.includes(code)){ err.textContent='Código inválido. Verifique e tente novamente.'; return; }
+  // Marcar como pago
+  var sess = getSession();
+  if(!sess){ err.textContent='Sessão expirada. Faça login novamente.'; return; }
+  var users = getUsers();
+  if(users[sess.email]){
+    users[sess.email].paid = true;
+    saveUsers(users);
+  }
+  sess.paid = true;
+  saveSession(sess);
+  err.style.color = '#4dcc8f';
+  err.textContent = '✓ Ativado com sucesso! Redirecionando...';
+  setTimeout(function(){ goToEditor(); }, 1200);
+}
 
 function goToEditor(){
   var sess = getSession();
@@ -429,6 +548,9 @@ function showScreen(name){
   document.getElementById('screen-'+name).classList.add('active');
 }
 
+/* ═══════════════════════════════════════════════════════
+   ON LOAD: check session
+═══════════════════════════════════════════════════════ */
 window.addEventListener('DOMContentLoaded', function(){
   var sess = getSession();
   if(!sess){ showScreen('auth'); return; }
@@ -439,7 +561,7 @@ window.addEventListener('DOMContentLoaded', function(){
    EDITOR STATE
 ═══════════════════════════════════════════════════════ */
 var currentEmail = '';
-var cfg = {bizname:'Espaço Beleza',tagline:'Studio & Spa',accent:'#c9a96e',accent2:'#e8c98a',bg:'#0e0c0b',logoDataUrl:'',t1:'Qual serviço?',t2:'Sua profissional',succ:'Seu horário foi confirmado. Você receberá uma confirmação no WhatsApp.',footer:'',slots:[],blocked:[]};
+var cfg = {bizname:'Espaço Beleza',tagline:'Studio & Spa',accent:'#c9a96e',accent2:'#e8c98a',bg:'#0e0c0b',logoDataUrl:'',t1:'Qual serviço?',t2:'Sua profissional',succ:'Seu horário foi confirmado. Você receberá uma confirmação no WhatsApp.',footer:''};
 var cardStyle='classic', gridCols=2, iconSize='md', cardRadius=14;
 var services=[{icon:'✂️',name:'Corte Feminino',dur:'60 min',price:'R$ 80'},{icon:'🎨',name:'Coloração',dur:'120 min',price:'R$ 180'},{icon:'💆',name:'Progressiva',dur:'180 min',price:'R$ 250'},{icon:'💄',name:'Maquiagem',dur:'60 min',price:'R$ 120'},{icon:'💅',name:'Mani & Pedi',dur:'90 min',price:'R$ 70'},{icon:'🌿',name:'Hidratação',dur:'60 min',price:'R$ 90'}];
 var profs=[{name:'Ana Lima',spec:'Coloração & Cortes',rating:'4.9'},{name:'Camila Reis',spec:'Progressiva',rating:'4.8'},{name:'Fernanda Costa',spec:'Maquiagem & Unhas',rating:'4.7'}];
@@ -456,13 +578,18 @@ var PRESETS={
 
 function initEditor(sess){
   currentEmail = sess.email;
+  // atualizar topbar
   document.getElementById('topbar-biz-name').textContent = '/ '+sess.name;
-  var days = Math.max(0, Math.ceil((sess.trialExpiry - Date.now()) / (24*60*60*1000)));
   var badge = document.getElementById('topbar-trial-badge');
-  if(sess.paid){ badge.style.display='none'; }
-  else if(days>0){ badge.textContent='● '+days+' dia'+(days>1?'s':'')+' grátis'; badge.style.color='var(--green)'; }
-  else{ badge.textContent='● Trial expirado'; badge.style.color='var(--red)'; }
-
+  if(sess.paid){
+    badge.textContent='● Plano ativo'; badge.style.color='var(--green)';
+  } else {
+    var ms = sess.trialExpiry - Date.now();
+    var days = ms > 0 ? Math.ceil(ms / (24*60*60*1000)) : 0;
+    if(days>0){ badge.textContent='● '+days+' dia'+(days>1?'s':'')+' grátis'; badge.style.color='var(--green)'; }
+    else{ badge.textContent='● Trial expirado'; badge.style.color='var(--red)'; }
+  }
+  // carregar config salva
   var saved = getUserConfig(sess.email);
   if(saved){
     if(saved.cfg) Object.assign(cfg, saved.cfg);
@@ -473,49 +600,36 @@ function initEditor(sess){
     if(saved.iconSize) iconSize = saved.iconSize;
     if(saved.cardRadius!==undefined) cardRadius = saved.cardRadius;
   }
-
   buildSidebarContent('sidebar-desktop');
   buildSidebarContent('mpane-edit');
-  
-  // 🔧 CORREÇÃO: sincronizar campos de horários e dias bloqueados com os valores carregados
-  syncSlotsAndBlocked();
-  
   updatePreview();
 }
 
-function syncSlotsAndBlocked(){
-  // Atualiza textarea de horários
-  var slotsTextarea = document.getElementById('cfg-slots');
-  if(slotsTextarea && cfg.slots && Array.isArray(cfg.slots) && cfg.slots.length){
-    slotsTextarea.value = cfg.slots.join('\n');
-  }
-  // Atualiza checkboxes de dias bloqueados
-  var blkDom = document.getElementById('blk-dom');
-  var blkSab = document.getElementById('blk-sab');
-  if(cfg.blocked && Array.isArray(cfg.blocked)){
-    if(blkDom) blkDom.checked = cfg.blocked.includes(0);
-    if(blkSab) blkSab.checked = cfg.blocked.includes(6);
-  }
-  // Se não existirem slots salvos, garante que o textarea tenha valores padrão (já vem do HTML)
-}
-
+/* ═══════════════════════════════════════════════════════
+   BUILD SIDEBAR HTML
+═══════════════════════════════════════════════════════ */
 function buildSidebarContent(containerId){
   var c = document.getElementById(containerId);
   c.innerHTML = sidebarHTML();
+  // re-bind values
   document.querySelectorAll('#'+containerId+' [data-cfg]').forEach(function(el){
     var k = el.getAttribute('data-cfg');
     if(cfg[k]!==undefined) el.value = cfg[k];
   });
+  // logo preview
   if(cfg.logoDataUrl){
     document.querySelectorAll('.logo-preview-img').forEach(function(img){img.src=cfg.logoDataUrl;img.style.display='block'});
     document.querySelectorAll('.upload-hint').forEach(function(h){h.style.display='none'});
   }
   renderServicesList();
   renderProfsList();
+  // card style active
   document.querySelectorAll('.card-style-opt[data-style="'+cardStyle+'"]').forEach(function(el){el.classList.add('active')});
+  // ctrl buttons
   activateCtrl('cols',gridCols);
   activateCtrl('icn',iconSize);
   activateCtrl('rad',cardRadius);
+  // theme dot
   document.querySelectorAll('.theme-dot').forEach(function(d){
     if(d.dataset.accent===cfg.accent) d.classList.add('active');
   });
@@ -654,10 +768,12 @@ function sidebarHTML(){
       <div>
         <span class="field-label-s">WhatsApp do estabelecimento</span>
         <input class="field-input-s" id="cfg-whatsapp" data-cfg="whatsapp" oninput="cfgInput(this,'whatsapp')" placeholder="5511999999999 (com DDI+DDD)">
+        <span style="font-size:10px;color:#444;display:block;margin-top:4px">Ex: 5562999887766 — sem espaços ou símbolos</span>
       </div>
       <div>
         <span class="field-label-s">URL do Google Sheets (webhook)</span>
         <input class="field-input-s" id="cfg-sheets" data-cfg="sheetsUrl" oninput="cfgInput(this,'sheetsUrl')" placeholder="https://script.google.com/macros/s/...">
+        <span style="font-size:10px;color:#444;display:block;margin-top:4px">Veja instruções abaixo para configurar</span>
       </div>
       <div style="background:#161410;border:1px solid rgba(201,169,110,.15);border-radius:8px;padding:.75rem;font-size:11px;color:#777;line-height:1.7">
         <strong style="color:#c9a96e;display:block;margin-bottom:.35rem">Como configurar o Google Sheets:</strong>
@@ -681,11 +797,10 @@ function sidebarHTML(){
 
   <!-- HORÁRIOS -->
   <div class="sidebar-section">
-    <button class="sidebar-toggle open" onclick="toggleSection(this)">🕐 Horários <span class="arrow">▼</span></button>
-    <div class="sidebar-body open">
+    <button class="sidebar-toggle" onclick="toggleSection(this)">🕐 Horários <span class="arrow">▼</span></button>
+    <div class="sidebar-body">
       <div><span class="field-label-s">Horários (um por linha)</span>
-        <textarea class="field-input-s" id="cfg-slots" style="height:100px" oninput="updatePreview()">
-08:00
+        <textarea class="field-input-s" id="cfg-slots" style="height:100px" oninput="updatePreview()">08:00
 09:00
 09:30
 10:00
@@ -736,6 +851,9 @@ function cardStyleOpts(){
   }).join('');
 }
 
+/* ═══════════════════════════════════════════════════════
+   SIDEBAR CONTROLS
+═══════════════════════════════════════════════════════ */
 function toggleSection(btn){btn.classList.toggle('open');btn.nextElementSibling.classList.toggle('open')}
 function triggerLogo(area){area.querySelector('input[type=file]').click()}
 function uploadLogo(input){
@@ -791,6 +909,7 @@ function applyType(t){
   renderServicesList();renderProfsList();updatePreview();
 }
 
+/* services */
 function renderServicesList(){
   document.querySelectorAll('#services-list').forEach(function(list){
     list.innerHTML='';
@@ -804,6 +923,7 @@ function renderServicesList(){
 function addService(){services.push({icon:'⭐',name:'Novo Serviço',dur:'60 min',price:'R$ 0'});renderServicesList();updatePreview()}
 function removeService(i){services.splice(i,1);renderServicesList();updatePreview()}
 
+/* profs */
 function renderProfsList(){
   document.querySelectorAll('#profs-list').forEach(function(list){
     list.innerHTML='';
@@ -817,20 +937,13 @@ function renderProfsList(){
 function addProf(){profs.push({name:'Novo Profissional',spec:'Especialidade',rating:'5.0'});renderProfsList();updatePreview()}
 function removeProf(i){profs.splice(i,1);renderProfsList();updatePreview()}
 
+/* ═══════════════════════════════════════════════════════
+   SAVE CONFIG
+═══════════════════════════════════════════════════════ */
 function saveConfig(){
   if(!currentEmail)return;
-  // Lê horários e bloqueios atuais do DOM
-  var slotsTextarea = document.getElementById('cfg-slots');
-  var slots = slotsTextarea ? slotsTextarea.value.split('\n').map(function(s){return s.trim()}).filter(Boolean) : [];
-  var blkDom = document.getElementById('blk-dom');
-  var blkSab = document.getElementById('blk-sab');
-  var blocked = [];
-  if(blkDom && blkDom.checked) blocked.push(0);
-  if(blkSab && blkSab.checked) blocked.push(6);
-  cfg.slots = slots;
-  cfg.blocked = blocked;
-  
   var data={cfg:Object.assign({},cfg),services:services,profs:profs,cardStyle:cardStyle,gridCols:gridCols,iconSize:iconSize,cardRadius:cardRadius};
+  // salva localmente também (backup)
   saveUserConfig(currentEmail, data);
   var link = buildShareLink();
   document.getElementById('save-link-display').textContent=link;
@@ -843,20 +956,23 @@ function copySaveLink(){
   setTimeout(function(){document.getElementById('save-link-display').style.color=''},1500);
 }
 
-function buildShareLink() {
-  var slotsTextarea = document.getElementById('cfg-slots');
-  var slots = slotsTextarea ? slotsTextarea.value.split('\n').map(function(s) { return s.trim(); }).filter(Boolean) : [];
+/* ═══════════════════════════════════════════════════════
+   SHARE LINK — config embutida em Base64 no hash da URL
+   Funciona para qualquer cliente em qualquer dispositivo
+═══════════════════════════════════════════════════════ */
+function buildShareLink(){
+  // Lê horários e dias bloqueados do painel
+  var slotsEl = document.getElementById('cfg-slots');
+  var slots = slotsEl ? slotsEl.value.split('\n').map(function(s){return s.trim()}).filter(Boolean) : [];
   var blkDom = document.getElementById('blk-dom');
   var blkSab = document.getElementById('blk-sab');
   var blocked = [];
-  if (blkDom && blkDom.checked) blocked.push(0);
-  if (blkSab && blkSab.checked) blocked.push(6);
-  cfg.slots = slots;
-  cfg.blocked = blocked;
+  if(blkDom && blkDom.checked) blocked.push(0);
+  if(blkSab && blkSab.checked) blocked.push(6);
 
-  var cfgShare = Object.assign({}, cfg);
+  // Logo removido do link — evita link gigante
+  var cfgShare = Object.assign({}, cfg, {slots: slots, blocked: blocked});
   delete cfgShare.logoDataUrl;
-
   var data = {
     cfg: cfgShare,
     services: services,
@@ -870,19 +986,11 @@ function buildShareLink() {
   };
 
   var json = JSON.stringify(data);
-  // --- Geração de Base64 URL-safe ---
-  // 1. Converte UTF-8 para Base64 padrão
-  var utf8Bytes = new TextEncoder().encode(json);
-  var binaryString = '';
-  for (var i = 0; i < utf8Bytes.length; i++) {
-    binaryString += String.fromCharCode(utf8Bytes[i]);
-  }
-  var base64Std = btoa(binaryString);
-  // 2. Substitui caracteres para URL-safe
-  var base64Url = base64Std.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-  // ---------------------------------
+  // Codificar UTF-8 → Base64 corretamente
+  var b64 = btoa(encodeURIComponent(json).replace(/%([0-9A-F]{2})/g, function(m,p){return String.fromCharCode(parseInt(p,16))}));
+  // NÃO fazer encodeURIComponent do b64 para evitar %2B %2F %3D no link
   var base = location.href.replace(/\/[^\/]*(\?.*)?$/, '/');
-  return base + 'agendamento.html#d=' + base64Url;
+  return base + 'agendamento.html#d=' + b64;
 }
 function openShareModal(){
   var link = buildShareLink();
@@ -901,6 +1009,9 @@ function copyShareLink(){
   });
 }
 
+/* ═══════════════════════════════════════════════════════
+   MOBILE TABS
+═══════════════════════════════════════════════════════ */
 function switchMobTab(tab){
   document.querySelectorAll('.mob-tab').forEach(function(t){t.classList.remove('active')});
   document.getElementById('mobtab-'+tab).classList.add('active');
@@ -909,8 +1020,12 @@ function switchMobTab(tab){
   if(tab==='preview') updateMobilePreview();
 }
 
+/* ═══════════════════════════════════════════════════════
+   BUILD APP HTML (para prévia e export)
+═══════════════════════════════════════════════════════ */
 function hexToRgb(hex){var n=parseInt(hex.replace('#',''),16);return((n>>16)&255)+','+(((n>>8)&255))+','+(n&255)}
 function addBr(hex,a){var n=parseInt(hex.replace('#',''),16);return '#'+((1<<24)|(Math.min(255,((n>>16)&255)+a)<<16)|(Math.min(255,((n>>8)&255)+a)<<8)|Math.min(255,(n&255)+a)).toString(16).slice(1)}
+
 function getIconPx(){return{sm:'18px',md:'26px',lg:'34px',xl:'44px'}[iconSize]||'26px'}
 function togVal(id){var el=document.getElementById(id);return el?el.checked:true}
 
@@ -952,8 +1067,13 @@ function buildCardHTML(s,idx){
 }
 
 function buildAppHTML(){
-  var slots=cfg.slots && cfg.slots.length ? cfg.slots : (document.getElementById('cfg-slots') ? document.getElementById('cfg-slots').value.split('\n').map(function(s){return s.trim()}).filter(Boolean) : []);
-  var blocked=cfg.blocked && cfg.blocked.length ? cfg.blocked : (function(){var b=[];if(document.getElementById('blk-dom') && document.getElementById('blk-dom').checked) b.push(0);if(document.getElementById('blk-sab') && document.getElementById('blk-sab').checked) b.push(6);return b;})();
+  var slots=[];
+  var slotsEl=document.getElementById('cfg-slots');
+  if(slotsEl) slots=slotsEl.value.split('\n').map(function(s){return s.trim()}).filter(Boolean);
+  var blocked=[];
+  var blkDom=document.getElementById('blk-dom'),blkSab=document.getElementById('blk-sab');
+  if(blkDom&&blkDom.checked) blocked.push(0);
+  if(blkSab&&blkSab.checked) blocked.push(6);
   var accent=cfg.accent,aRgb=hexToRgb(accent),accent2=cfg.accent2||lighten(accent,30),bg=cfg.bg;
   var surface=addBr(bg,8),surface2=addBr(bg,14);
   var gridCSS=gridCols===1?'grid-template-columns:1fr':gridCols===3?'grid-template-columns:1fr 1fr 1fr':'grid-template-columns:1fr 1fr';
@@ -966,8 +1086,7 @@ function buildAppHTML(){
     return '<div class="prof-card" onclick="selectProf(this,\''+p.name.replace(/'/g,"\\'")+'\')"><div class="prof-avatar" style="background:'+col+'22;color:'+col+'">'+initials+'</div><div><div class="prof-name">'+p.name+'</div><div class="prof-spec">'+p.spec+'</div><div class="prof-stars">⭐ '+p.rating+'</div></div></div>';
   }).join('')+'<div class="prof-card" onclick="selectProf(this,\'Qualquer disponível\')"><div class="prof-avatar" style="background:rgba(138,126,114,.12);color:#8a7e72">?</div><div><div class="prof-name">Qualquer disponível</div><div class="prof-spec">Primeiro horário livre</div></div></div>';
   var logoHTML=cfg.logoDataUrl?'<img src="'+cfg.logoDataUrl+'" style="max-height:54px;max-width:180px;object-fit:contain;display:block;margin:0 auto .4rem">':'';
-  var whatsapp = cfg.whatsapp || '';
-  var sheetsUrl = cfg.sheetsUrl || '';
+
   return `<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -1140,8 +1259,6 @@ var calDate=new Date();calDate.setDate(1);
 var slots=${JSON.stringify(slots)};
 var blocked=${JSON.stringify(blocked)};
 var busy=[1,4,7];
-var whatsapp="${whatsapp}";
-var sheetsUrl="${sheetsUrl}";
 function goStep(n){
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
   document.getElementById('step'+n).classList.add('active');
@@ -1214,9 +1331,6 @@ function validateForm(){
 }
 function confirmBooking(){
   var code='#AG'+Math.floor(1000+Math.random()*9000);
-  var nome=document.getElementById('fname').value.trim();
-  var fone=document.getElementById('fphone').value.trim();
-  var email=document.getElementById('femail').value.trim();
   document.getElementById('conf-code').textContent=code;
   document.getElementById('c-service').textContent=bk.service;
   document.getElementById('c-prof').textContent=bk.prof;
@@ -1226,24 +1340,12 @@ function confirmBooking(){
   document.getElementById('step5').classList.add('active');
   document.getElementById('steps').style.display='none';
   window.scrollTo({top:0,behavior:'smooth'});
-  // Enviar notificações
-  if(sheetsUrl){
-    fetch(sheetsUrl,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({codigo:code,estabelecimento:'${cfg.bizname}',servico:bk.service,
-        profissional:bk.prof,data:bk.date,horario:bk.time,preco:bk.price,
-        cliente:nome,whatsapp:fone,email:email,timestamp:new Date().toLocaleString('pt-BR')})
-    }).catch(function(){});
-  }
-  if(whatsapp){
-    var msg='🗓 *Novo Agendamento* '+code+'\\n\\n*Estabelecimento:* ${cfg.bizname}\\n*Serviço:* '+bk.service+'\\n*Profissional:* '+bk.prof+'\\n*Data:* '+bk.date+' às '+bk.time+'\\n*Valor:* '+bk.price+'\\n\\n*Cliente:* '+nome+'\\n*WhatsApp:* '+fone+(email?'\\n*E-mail:* '+email:'');
-    setTimeout(function(){window.open('https://wa.me/'+whatsapp.replace(/\\D/g,'')+'?text='+encodeURIComponent(msg),'_blank');},800);
-  }
 }
 function restart(){
   bk={service:'',prof:'',date:'',time:'',price:''};
   document.getElementById('steps').style.display='flex';
   document.querySelectorAll('.service-card,.prof-card,.cal-day,.time-slot').forEach(e=>e.classList.remove('selected'));
-  ['btn1','btn2','btn3','btn4'].forEach(function(id){var b=document.getElementById(id);if(b)b.disabled=true;});
+  ['btn1','btn2','btn3'].forEach(function(id){document.getElementById(id).disabled=true;});
   document.getElementById('fname').value='';document.getElementById('fphone').value='';document.getElementById('femail').value='';
   goStep(1);renderCal();
 }
@@ -1253,11 +1355,15 @@ renderCal();
 </html>`;
 }
 
+/* ═══════════════════════════════════════════════════════
+   UPDATE PREVIEW
+═══════════════════════════════════════════════════════ */
 var _pt=null;
 function updatePreview(){
   clearTimeout(_pt);
   _pt=setTimeout(function(){
     var html=buildAppHTML();
+    // desktop
     var frame=document.getElementById('preview');
     if(frame){
       var doc=frame.contentDocument||frame.contentWindow.document;
